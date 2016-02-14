@@ -1,2 +1,2 @@
-Scala examples showing several syntactical features
+Functional Image processing
 ======

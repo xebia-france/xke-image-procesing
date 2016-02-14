@@ -1,6 +1,6 @@
 name := "scala-code-examples"
 
-organization := "co.lucasian.scala"
+organization := "fr.xebia.scala"
 
 version := "0.1"
 
