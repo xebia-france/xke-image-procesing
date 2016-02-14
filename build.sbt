@@ -11,9 +11,4 @@ libraryDependencies ++= Seq(
   "org.spire-math" %% "cats" % "0.3.0"
 )
 
-
-DockerForRunningTest.buildScalaSourcesSettings
-
-DockerForRunningTest.makeBashFileToTestSettings
-
 fork in Runtime := true
