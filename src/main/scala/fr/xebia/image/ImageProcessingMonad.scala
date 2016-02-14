@@ -38,6 +38,9 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
       .map { case (index, row) => Position(index, row.indexOf(searched))}
   }
 
+  def replace(neighborList: List[Position], value: U): ImageProcessingMonad[U] =
+    ImageProcessingMonad(rawImage.replace(neighborList, value))
+
   def threshold(f: U => Boolean, replaceBy: U): ImageProcessingMonad[U] =
     map(cell => if (f(cell)) replaceBy else cell)
 

@@ -20,6 +20,7 @@ case class RawImage[U](content: List[List[U]]) {
     def go(updatedImage: RawImage[U], remainingNeighbor: List[Position]): RawImage[U] = {
       remainingNeighbor match {
         case Nil =>
+          // TODO: remove empty line at the end
           updatedImage
         case currentPos :: remainingPositions =>
           val newContent = updatedImage.content.updated(
@@ -48,23 +49,8 @@ case class RawImage[U](content: List[List[U]]) {
       .filter(pos => pos.x < content.size && pos.y < content.head.size)
   }
 
-  def neighborsAndSelf(center: Position): List[Position] = {
-    val neigh = scala.collection.mutable.ArrayBuffer.empty[Position]
-    neigh += center.copy(x = center.x - 1, y = center.y - 1)
-    neigh += center.copy(x = center.x - 1)
-    neigh += center.copy(x = center.x - 1, y = center.y + 1)
-    neigh += center.copy(y = center.y + 1)
-    neigh += center
-    neigh += center.copy(y = center.y + 1, x = center.x + 1)
-    neigh += center.copy(y = center.y - 1)
-    neigh += center.copy(y = center.y - 1, x = center.x + 1)
-    neigh += center.copy(x = center.x + 1)
-
-    neigh
-      .toList
-      .filter(pos => pos.x >= 0 && pos.y >= 0)
-      .filter(pos => pos.x < content.size && pos.y < content.head.size)
-  }
+  def neighborsAndSelf(center: Position): List[Position] =
+    neighborsOnly(center) :+ center
 
   def at(pos: Position): U = content(pos.x)(pos.y)
 

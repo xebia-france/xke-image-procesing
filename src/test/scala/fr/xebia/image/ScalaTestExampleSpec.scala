@@ -72,10 +72,10 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
         searchedValue = "#",
         frontMark = specialChar
       )
-      val segmentedImage = monad.rawImage.replace(segmentedPositions, specialChar)
+      val segmentedImage = monad.replace(segmentedPositions, specialChar)
 
       // then
-      segmentedImage shouldBe TestImageBuilder.fromString(
+      segmentedImage.rawImage shouldBe TestImageBuilder.fromString(
         """
           |......@@@........
           |...@@@...@@......
@@ -91,45 +91,56 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
       )
     }
 
+  }
+
+  describe("a front propagation monad") {
+
+    val rawImage = TestImageBuilder.fromString(
+      """
+        |......###........
+        |...###...##......
+        |..##.......##....
+        |..############...
+        |.................
+        |.................
+        |..############...
+        |...#########.....
+        |.....####........
+        |.................
+      """.stripMargin)
+
+    it("should detect a missing first match in the image") {
+      ImageProcessingMonad[String](rawImage)
+        .getFirstThatMatches("&") shouldNot be(defined)
+    }
+
     it("should propagate a front from the first value that matches") {
-      val specialChar = "@"
       // given
-      val rawImage = TestImageBuilder.fromString(
-        """
-          |......###........
-          |...###...##......
-          |..##.......##....
-          |..############...
-          |.................
-          |.................
-          |..############...
-          |...#########.....
-          |.....####........
-          |.................
-        """.stripMargin)
+      val firstFrontMonad = ImageProcessingMonad[String](rawImage)
+      val firstSeed = aSeedThatMatches(firstFrontMonad, Position(0, 6), "#")
 
-      // when
-      val monad = ImageProcessingMonad[String](rawImage)
-
-      // then it should not detect non present elements
-      monad.getFirstThatMatches("&") shouldNot be(defined)
-
-      // then it should detect present elements
-      val firstSeed = monad
-        .getFirstThatMatches("#")
-        .getOrElse(throw new IllegalStateException("# not found"))
-      firstSeed shouldBe Position(0, 6)
-
-      val segmentedPositions = monad.propagateFront(
-        neighbors = monad.rawImage.neighborsAndSelf(firstSeed),
+      // when the first monad is called
+      val firstNeighborhood = firstFrontMonad.rawImage.neighborsAndSelf(firstSeed)
+      val firstFront: List[Position] = firstFrontMonad.propagateFront(
+        neighbors = firstNeighborhood,
         searchedValue = "#",
-        frontMark = specialChar
+        frontMark = "@"
       )
-      val segmentedImage: RawImage[String] = monad.rawImage.replace(segmentedPositions, specialChar)
+      firstFront shouldNot be(empty)
+      //firstFrontMonad.replace(firstFront, "@").rawImage.writeToFile("firstSegmentation.txt")
 
-      //monad.propagateFront(firstSeed)
-      // then
-    /*      segmentedImage shouldBe TestImageBuilder.fromString(
+      // when the second monad
+      val secondFrontMonad = firstFrontMonad.replace(firstFront, "@")
+      val secondSeed = aSeedThatMatches(secondFrontMonad, Position(6, 2), "#")
+
+      val neighborhoodSecond = firstFrontMonad.rawImage.neighborsAndSelf(secondSeed)
+      val secondFront: List[Position] = secondFrontMonad.propagateFront(
+        neighbors = neighborhoodSecond,
+        searchedValue = "#",
+        frontMark = "&"
+      )
+      //secondFrontMonad.replace(secondFront, "&").rawImage.writeToFile("secondSegmentation.txt")
+      secondFrontMonad.replace(secondFront, "&").rawImage shouldBe TestImageBuilder.fromString(
         """
           |......@@@........
           |...@@@...@@......
@@ -137,12 +148,13 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
           |..@@@@@@@@@@@@...
           |.................
           |.................
-          |..@@@@@@@@@@@@...
-          |...@@@@@@@@@.....
-          |.....@@@@........
+          |..&&&&&&&&&&&&...
+          |...&&&&&&&&&.....
+          |.....&&&&........
           |.................
         """.stripMargin
-      )*/
+      )
+      //true shouldBe true
     }
 
   }
@@ -150,6 +162,21 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
 }
 
 object ImagingTools {
+
+  def aSeedThatMatches(firstFrontMonad: ImageProcessingMonad[String], position: Position, expectedValue: String): Position = {
+    val firstSeed = firstFrontMonad
+      .getFirstThatMatches("#")
+      .getOrElse(throw new IllegalStateException("# not found"))
+    if (firstSeed == position) {
+      if (firstFrontMonad.rawImage.at(firstSeed) == "#") {
+        firstSeed
+      } else {
+        throw new IllegalStateException("Values don't match")
+      }
+    } else {
+      throw new IllegalStateException("Seed don't match")
+    }
+  }
 
   object TestImageBuilder {
 
