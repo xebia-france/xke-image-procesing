@@ -46,7 +46,7 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
       )
     }
 
-    it("should propagate a front") {
+    it("should propagate a front from a specified seed") {
       val specialChar = "@"
       // given
       val rawImage = TestImageBuilder.fromString(
@@ -89,6 +89,60 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
           |.................
         """.stripMargin
       )
+    }
+
+    it("should propagate a front from the first value that matches") {
+      val specialChar = "@"
+      // given
+      val rawImage = TestImageBuilder.fromString(
+        """
+          |......###........
+          |...###...##......
+          |..##.......##....
+          |..############...
+          |.................
+          |.................
+          |..############...
+          |...#########.....
+          |.....####........
+          |.................
+        """.stripMargin)
+
+      // when
+      val monad = ImageProcessingMonad[String](rawImage)
+
+      // then it should not detect non present elements
+      monad.getFirstThatMatches("&") shouldNot be(defined)
+
+      // then it should detect present elements
+      val firstSeed = monad
+        .getFirstThatMatches("#")
+        .getOrElse(throw new IllegalStateException("# not found"))
+      firstSeed shouldBe Position(0, 6)
+
+      val segmentedPositions = monad.propagateFront(
+        neighbors = monad.rawImage.neighborsAndSelf(firstSeed),
+        searchedValue = "#",
+        frontMark = specialChar
+      )
+      val segmentedImage: RawImage[String] = monad.rawImage.replace(segmentedPositions, specialChar)
+
+      //monad.propagateFront(firstSeed)
+      // then
+    /*      segmentedImage shouldBe TestImageBuilder.fromString(
+        """
+          |......@@@........
+          |...@@@...@@......
+          |..@@.......@@....
+          |..@@@@@@@@@@@@...
+          |.................
+          |.................
+          |..@@@@@@@@@@@@...
+          |...@@@@@@@@@.....
+          |.....@@@@........
+          |.................
+        """.stripMargin
+      )*/
     }
 
   }

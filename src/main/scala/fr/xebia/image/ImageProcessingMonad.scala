@@ -3,6 +3,7 @@ package fr.xebia.image
 case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
 
   //val corner = maze.at(Position(9, 16))
+  // TODO: implement
   def countUnconnectedElements(contentValue: U, replaceValue: U): Int = {
     println("")
     val seedPosition = Position(0, 6)
@@ -26,6 +27,15 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
       }
     }
     go(rawImage.copy(), neighbors, List.empty[Position])
+  }
+
+  def getFirstThatMatches(searched: U): Option[Position] = {
+    val zipped: List[(Int, List[U])] = rawImage.content.indices
+      .toList
+      .zip(rawImage.content)
+    zipped
+      .find { case (index, row) => row.contains(searched) }
+      .map { case (index, row) => Position(index, row.indexOf(searched))}
   }
 
   def threshold(f: U => Boolean, replaceBy: U): ImageProcessingMonad[U] =
