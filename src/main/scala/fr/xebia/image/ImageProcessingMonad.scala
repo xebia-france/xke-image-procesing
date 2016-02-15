@@ -2,9 +2,9 @@ package fr.xebia.image
 
 import scala.annotation.tailrec
 
-case class ImageProcessingMonad[U](rawImage: RawImage[U], emptyValue: U) {
+case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
 
-  def countConnectedElements(contentValue: U): Int = {
+  def countConnectedElements(contentValue: U, emptyValue: U): Int = {
     @tailrec
     def go(copyImage: RawImage[U], maybePosition: Option[Position], connectedElements: Int): Int = {
       maybePosition match {
@@ -46,18 +46,18 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U], emptyValue: U) {
     onImage.getFirstThatMatches(searched)
 
   def replace(neighborList: List[Position], value: U): ImageProcessingMonad[U] =
-    ImageProcessingMonad(rawImage.replace(neighborList, value), emptyValue)
+    ImageProcessingMonad(rawImage.replace(neighborList, value))
 
   def threshold(f: U => Boolean, replaceBy: U): ImageProcessingMonad[U] =
-    map[U](cell => if (f(cell)) replaceBy else cell, emptyValue)
+    map[U](cell => if (f(cell)) replaceBy else cell)
 
-  def map[R](f: U => R, defaultEmptyValue: R): ImageProcessingMonad[R] = {
+  def map[R](f: U => R): ImageProcessingMonad[R] = {
     ImageProcessingMonad[R](
       RawImage(
         rawImage.content.map(_.map(cell => f(cell)))
-      ),
-      defaultEmptyValue
+      )
     )
   }
+
 }
 
