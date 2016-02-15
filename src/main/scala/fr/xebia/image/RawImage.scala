@@ -16,6 +16,15 @@ case class Position(x: Int, y: Int) {
 
 case class RawImage[U](content: List[List[U]]) {
 
+  def getFirstThatMatches(searched: U): Option[Position] = {
+    val zipped: List[(Int, List[U])] = content.indices
+      .toList
+      .zip(content)
+    zipped
+      .find { case (index, row) => row.contains(searched) }
+      .map { case (index, row) => Position(index, row.indexOf(searched))}
+  }
+
   def replace(neighborList: List[Position], value: U): RawImage[U] = {
     def go(updatedImage: RawImage[U], remainingNeighbor: List[Position]): RawImage[U] = {
       remainingNeighbor match {

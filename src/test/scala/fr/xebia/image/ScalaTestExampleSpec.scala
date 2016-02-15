@@ -24,7 +24,7 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
         """.stripMargin)
 
       // when
-      val segmentedImg = ImageProcessingMonad[String](rawImage).threshold(
+      val segmentedImg = ImageProcessingMonad[String](rawImage, ".").threshold(
         cell => cell == "#",
         replaceBy = "@"
       )
@@ -65,7 +65,7 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
       val seed = Position(0, 7)
 
       // when
-      val monad = ImageProcessingMonad[String](rawImage)
+      val monad = ImageProcessingMonad[String](rawImage, ".")
 
       val segmentedPositions = monad.propagateFront(
         seeds = monad.rawImage.neighborsAndSelf(seed),
@@ -109,14 +109,14 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
       """.stripMargin)
 
     it("should detect a missing first match in the image") {
-      ImageProcessingMonad[String](rawImage)
+      ImageProcessingMonad[String](rawImage, ".")
         .getFirstThatMatches("&") shouldNot be(defined)
     }
 
     it("should propagate a front from the first value that matches") {
       // given
-      val firstFrontMonad = ImageProcessingMonad[String](rawImage)
-      val firstSeed = aSeedThatMatches(firstFrontMonad, Position(0, 6), "#")
+      val firstFrontMonad = ImageProcessingMonad[String](rawImage, ".")
+      val firstSeed = aSeedThatMatches(firstFrontMonad,  Position(0, 6), "#")
 
       // when the first monad is called
       val firstFront: List[Position] = firstFrontMonad.propagateFront(
@@ -125,7 +125,7 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
         markWith = "@"
       )
       firstFront shouldNot be(empty)
-      firstFrontMonad.replace(firstFront, "@").rawImage.writeToFile("firstSegmentation.txt")
+      //firstFrontMonad.replace(firstFront, "@").rawImage.writeToFile("firstSegmentation.txt")
 
       // when the second monad
       val secondFrontMonad = firstFrontMonad.replace(firstFront, "@")
@@ -151,6 +151,24 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
           |.................
         """.stripMargin
       )
+    }
+
+    it("should detect two different elements in the image") {
+      val rawImage = TestImageBuilder.fromString(
+        """
+          |......###........
+          |...###...##......
+          |..##.......##....
+          |..############...
+          |.................
+          |.................
+          |..############...
+          |...#########.....
+          |.....####.....##.
+          |..............#..
+        """.stripMargin)
+      val firstFrontMonad = ImageProcessingMonad[String](rawImage, emptyValue = ".")
+      firstFrontMonad.countConnectedElements("#") shouldBe 3
     }
 
   }
@@ -183,8 +201,5 @@ object ImagingTools {
     }
 
   }
-
-  def anImageMonad(content: String): ImageProcessingMonad[String] =
-    ImageProcessingMonad(TestImageBuilder.fromString(content))
 
 }

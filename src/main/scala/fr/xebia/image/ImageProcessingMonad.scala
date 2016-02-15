@@ -1,21 +1,31 @@
 package fr.xebia.image
 
-case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
+import scala.annotation.tailrec
 
-  //val corner = maze.at(Position(9, 16))
-  // TODO: implement
-  def countUnconnectedElements(contentValue: U, replaceValue: U): Int = {
-    println("")
-    val seedPosition = Position(0, 6)
-    val neighbors = rawImage.neighborsAndSelf(seedPosition)
-    val connectedPoints = propagateFront(neighbors, contentValue, replaceValue)
-    val newImage = rawImage.replace(connectedPoints, replaceValue)
-    //newImage.writeToFile("result.txt")
-    //println(s"first value <$newMaze>")
-    0
+case class ImageProcessingMonad[U](rawImage: RawImage[U], emptyValue: U) {
+
+  def countConnectedElements(contentValue: U): Int = {
+    @tailrec
+    def go(copyImage: RawImage[U], maybePosition: Option[Position], connectedElements: Int): Int = {
+      maybePosition match {
+        case None =>
+          connectedElements
+
+        case Some(seed) =>
+          val connectedPoints = propagateFront(
+            copyImage.neighborsAndSelf(seed),
+            contentValue,
+            emptyValue
+          )
+          val newImage = copyImage.replace(connectedPoints, emptyValue)
+          go(newImage, getFirstThatMatchesOn(newImage, contentValue), connectedElements + 1)
+      }
+    }
+    go(this.rawImage, getFirstThatMatches(contentValue), 0)
   }
 
   private[image] def propagateFront(seeds: List[Position], searchedValue: U, markWith: U): List[Position] = {
+    @tailrec
     def go(imageCopy: RawImage[U], neighbors: List[Position], positions: List[Position]): List[Position] = {
       neighbors.filter(imageCopy.at(_) == searchedValue) match {
         case Nil =>
@@ -29,26 +39,25 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
     go(rawImage, seeds, List.empty[Position])
   }
 
-  def getFirstThatMatches(searched: U): Option[Position] = {
-    val zipped: List[(Int, List[U])] = rawImage.content.indices
-      .toList
-      .zip(rawImage.content)
-    zipped
-      .find { case (index, row) => row.contains(searched) }
-      .map { case (index, row) => Position(index, row.indexOf(searched))}
-  }
+  def getFirstThatMatches(searched: U): Option[Position] =
+    getFirstThatMatchesOn(rawImage, searched)
+
+  private def getFirstThatMatchesOn(onImage: RawImage[U], searched: U): Option[Position] =
+    onImage.getFirstThatMatches(searched)
 
   def replace(neighborList: List[Position], value: U): ImageProcessingMonad[U] =
-    ImageProcessingMonad(rawImage.replace(neighborList, value))
+    ImageProcessingMonad(rawImage.replace(neighborList, value), emptyValue)
 
   def threshold(f: U => Boolean, replaceBy: U): ImageProcessingMonad[U] =
-    map(cell => if (f(cell)) replaceBy else cell)
+    map[U](cell => if (f(cell)) replaceBy else cell, emptyValue)
 
-  def map[R](f: U => R): ImageProcessingMonad[R] = {
+  def map[R](f: U => R, defaultEmptyValue: R): ImageProcessingMonad[R] = {
     ImageProcessingMonad[R](
       RawImage(
         rawImage.content.map(_.map(cell => f(cell)))
-      ))
+      ),
+      defaultEmptyValue
+    )
   }
 }
 
