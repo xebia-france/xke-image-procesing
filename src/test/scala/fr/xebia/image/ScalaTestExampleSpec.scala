@@ -68,9 +68,9 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
       val monad = ImageProcessingMonad[String](rawImage)
 
       val segmentedPositions = monad.propagateFront(
-        neighbors = monad.rawImage.neighborsAndSelf(seed),
+        seeds = monad.rawImage.neighborsAndSelf(seed),
         searchedValue = "#",
-        frontMark = specialChar
+        markWith = specialChar
       )
       val segmentedImage = monad.replace(segmentedPositions, specialChar)
 
@@ -96,8 +96,7 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
   describe("a front propagation monad") {
 
     val rawImage = TestImageBuilder.fromString(
-      """
-        |......###........
+      """|......###........
         |...###...##......
         |..##.......##....
         |..############...
@@ -120,24 +119,22 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
       val firstSeed = aSeedThatMatches(firstFrontMonad, Position(0, 6), "#")
 
       // when the first monad is called
-      val firstNeighborhood = firstFrontMonad.rawImage.neighborsAndSelf(firstSeed)
       val firstFront: List[Position] = firstFrontMonad.propagateFront(
-        neighbors = firstNeighborhood,
+        seeds = List(firstSeed),
         searchedValue = "#",
-        frontMark = "@"
+        markWith = "@"
       )
       firstFront shouldNot be(empty)
-      //firstFrontMonad.replace(firstFront, "@").rawImage.writeToFile("firstSegmentation.txt")
+      firstFrontMonad.replace(firstFront, "@").rawImage.writeToFile("firstSegmentation.txt")
 
       // when the second monad
       val secondFrontMonad = firstFrontMonad.replace(firstFront, "@")
       val secondSeed = aSeedThatMatches(secondFrontMonad, Position(6, 2), "#")
 
-      val neighborhoodSecond = firstFrontMonad.rawImage.neighborsAndSelf(secondSeed)
       val secondFront: List[Position] = secondFrontMonad.propagateFront(
-        neighbors = neighborhoodSecond,
+        seeds = List(secondSeed),
         searchedValue = "#",
-        frontMark = "&"
+        markWith = "&"
       )
       //secondFrontMonad.replace(secondFront, "&").rawImage.writeToFile("secondSegmentation.txt")
       secondFrontMonad.replace(secondFront, "&").rawImage shouldBe TestImageBuilder.fromString(
@@ -154,7 +151,6 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
           |.................
         """.stripMargin
       )
-      //true shouldBe true
     }
 
   }
@@ -163,29 +159,26 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
 
 object ImagingTools {
 
-  def aSeedThatMatches(firstFrontMonad: ImageProcessingMonad[String], position: Position, expectedValue: String): Position = {
-    val firstSeed = firstFrontMonad
+  def aSeedThatMatches(processingMonad: ImageProcessingMonad[String], position: Position, expectedValue: String): Position = {
+    val firstSeed = processingMonad
       .getFirstThatMatches("#")
       .getOrElse(throw new IllegalStateException("# not found"))
-    if (firstSeed == position) {
-      if (firstFrontMonad.rawImage.at(firstSeed) == "#") {
-        firstSeed
-      } else {
-        throw new IllegalStateException("Values don't match")
-      }
-    } else {
-      throw new IllegalStateException("Seed don't match")
-    }
+    assert(firstSeed == position)
+    assert(processingMonad.rawImage.at(firstSeed) == "#")
+    firstSeed
   }
+
+  def writeToFile(processingMonad: ImageProcessingMonad[String], front: List[Position], fileName: String, newContent: String = "@") =
+    processingMonad.replace(front, newContent).rawImage.writeToFile(fileName)
 
   object TestImageBuilder {
 
     def fromString(rawContent: String): RawImage[String] = {
-      lazy val contents = rawContent
+      val contents: List[List[String]] = rawContent
         .split("\n")
         .map(_.toCharArray.toList.map(_.toString))
         .toList
-        .filter(_.nonEmpty)
+        .filter(_.map(_.trim).mkString.nonEmpty)
       RawImage(contents)
     }
 

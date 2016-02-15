@@ -11,4 +11,6 @@ libraryDependencies ++= Seq(
   "org.spire-math" %% "cats" % "0.3.0"
 )
 
+testOptions in Test += Tests.Argument("-oD")
+
 fork in Runtime := true

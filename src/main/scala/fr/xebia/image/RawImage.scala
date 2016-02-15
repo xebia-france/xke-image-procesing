@@ -20,8 +20,8 @@ case class RawImage[U](content: List[List[U]]) {
     def go(updatedImage: RawImage[U], remainingNeighbor: List[Position]): RawImage[U] = {
       remainingNeighbor match {
         case Nil =>
-          // TODO: remove empty line at the end
           updatedImage
+
         case currentPos :: remainingPositions =>
           val newContent = updatedImage.content.updated(
             currentPos.x,

@@ -15,18 +15,18 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
     0
   }
 
-  private[image] def propagateFront(neighbors: List[Position], searchedValue: U, frontMark: U): List[Position] = {
-    def go(maze: RawImage[U], neighbors: List[Position], positions: List[Position]): List[Position] = {
-      neighbors.filter(maze.at(_) == searchedValue) match {
+  private[image] def propagateFront(seeds: List[Position], searchedValue: U, markWith: U): List[Position] = {
+    def go(imageCopy: RawImage[U], neighbors: List[Position], positions: List[Position]): List[Position] = {
+      neighbors.filter(imageCopy.at(_) == searchedValue) match {
         case Nil =>
           positions
         case currentSeed :: remainingSeed =>
-          val newNeighborhood: List[Position] = maze.neighborsAndSelf(currentSeed)
-          val newImage = maze.replace(List(currentSeed), frontMark)
+          val newNeighborhood: List[Position] = imageCopy.neighborsAndSelf(currentSeed)
+          val newImage = imageCopy.replace(List(currentSeed), markWith)
           go(newImage, remainingSeed ++ newNeighborhood, positions :+ currentSeed)
       }
     }
-    go(rawImage.copy(), neighbors, List.empty[Position])
+    go(rawImage, seeds, List.empty[Position])
   }
 
   def getFirstThatMatches(searched: U): Option[Position] = {
