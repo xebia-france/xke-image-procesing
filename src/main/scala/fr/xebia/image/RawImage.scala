@@ -1,11 +1,17 @@
 package fr.xebia.image
 
+import scala.annotation.tailrec
+import scala.util.Try
+
 object ImageBuilder {
 
-  def fromFile(fileName: String): RawImage[String] = {
-    val input = FileTools.readImage(fileName)
-    lazy val contents = input.map(_.toCharArray.toList.map(_.toString))
-    RawImage(contents)
+  def fromFile[T](fileName: String): Option[RawImage[T]] = {
+    (for {
+      input <- Try(FileTools.readImage(fileName))
+      contents <- Try(input.map(_.toCharArray.toList.map(_.asInstanceOf[T])))
+    } yield {
+      RawImage[T](contents)
+    }).toOption
   }
 
 }
@@ -22,10 +28,14 @@ case class RawImage[U](content: List[List[U]]) {
       .zip(content)
     zipped
       .find { case (index, row) => row.contains(searched) }
-      .map { case (index, row) => Position(index, row.indexOf(searched))}
+      .map { case (index, row) => Position(index, row.indexOf(searched)) }
   }
 
+  def takeWhile(predicate: U => Boolean): List[U] =
+    content.collect { case (row) => row.filter(predicate(_)) }.flatten
+
   def replace(neighborList: List[Position], value: U): RawImage[U] = {
+    @tailrec
     def go(updatedImage: RawImage[U], remainingNeighbor: List[Position]): RawImage[U] = {
       remainingNeighbor match {
         case Nil =>

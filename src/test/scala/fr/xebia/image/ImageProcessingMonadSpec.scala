@@ -9,7 +9,7 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
 
     it("should replace '#' by '@'") {
       // given an image
-      val rawImage = TestImageBuilder.fromString(
+      val monad = TestImageBuilder.fromString(
         """
           |......###........
           |...###...##......
@@ -24,13 +24,13 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
         """.stripMargin)
 
       // when
-      val segmentedImg = ImageProcessingMonad[String](rawImage).threshold(
+      val segmentedImg = monad.threshold(
         cell => cell == "#",
         replaceBy = "@"
       )
 
       // then
-      segmentedImg.rawImage shouldBe TestImageBuilder.fromString(
+      segmentedImg shouldBe TestImageBuilder.fromString(
         """
           |......@@@........
           |...@@@...@@......
@@ -47,9 +47,12 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
     }
 
     it("should propagate a front from a specified seed") {
-      val specialChar = "@"
       // given
-      val rawImage = TestImageBuilder.fromString(
+      val specialChar = "@"
+      val seed = Position(0, 7)
+
+      // when
+      val monad = TestImageBuilder.fromString(
         """
           |......###........
           |...###...##......
@@ -62,20 +65,16 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
           |.....####........
           |.................
         """.stripMargin)
-      val seed = Position(0, 7)
-
-      // when
-      val monad = ImageProcessingMonad[String](rawImage)
 
       val segmentedPositions = monad.propagateFront(
-        seeds = monad.rawImage.neighborsAndSelf(seed),
+        seeds = monad.neighborsAndSelf(seed),
         searchedValue = "#",
         markWith = specialChar
       )
       val segmentedImage = monad.replace(segmentedPositions, specialChar)
 
       // then
-      segmentedImage.rawImage shouldBe TestImageBuilder.fromString(
+      segmentedImage shouldBe TestImageBuilder.fromString(
         """
           |......@@@........
           |...@@@...@@......
@@ -93,9 +92,9 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
 
   }
 
-  describe("a front propagation monad") {
+  describe("a segmentation monad executing front propagation") {
 
-    val rawImage = TestImageBuilder.fromString(
+    val monad = TestImageBuilder.fromString(
       """|......###........
         |...###...##......
         |..##.......##....
@@ -109,13 +108,12 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
       """.stripMargin)
 
     it("should detect a missing first match in the image") {
-      ImageProcessingMonad[String](rawImage)
-        .getFirstThatMatches("&") shouldNot be(defined)
+      monad.getFirstThatMatches("&") shouldNot be(defined)
     }
 
     it("should propagate a front from the first value that matches") {
       // given
-      val firstFrontMonad = ImageProcessingMonad[String](rawImage)
+      val firstFrontMonad = monad
       val firstSeed = aSeedThatMatches(firstFrontMonad,  Position(0, 6), "#")
 
       // when the first monad is called
@@ -135,7 +133,7 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
         searchedValue = "#",
         markWith = "&"
       )
-      secondFrontMonad.replace(secondFront, "&").rawImage shouldBe TestImageBuilder.fromString(
+      secondFrontMonad.replace(secondFront, "&") shouldBe TestImageBuilder.fromString(
         """
           |......@@@........
           |...@@@...@@......
@@ -151,25 +149,32 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
       )
     }
 
-    it("should detect two different elements in the image") {
-      val rawImage = TestImageBuilder.fromString(
+    it("should detect several different elements in the image") {
+      val monad = TestImageBuilder.fromString(
         """
-          |......###........
-          |...###...##......
-          |..##.......##....
-          |..############...
+          |.................
+          |...##......##....
+          |...##......##....
+          |...##......##....
           |.................
           |.................
-          |..############...
-          |...#########.....
-          |.....####.....##.
-          |..............#..
+          |..###......###...
+          |...##.....##.....
+          |.....#####.......
+          |.................
         """.stripMargin)
-      val firstFrontMonad = ImageProcessingMonad[String](rawImage)
-      firstFrontMonad.countConnectedElements(
+      monad.countConnectedElements(
         contentValue = "#",
         emptyValue = "."
       ) shouldBe 3
+    }
+
+  }
+
+  describe("a segmentation monad") {
+
+    it("should ") {
+
     }
 
   }
@@ -183,22 +188,22 @@ object ImagingTools {
       .getFirstThatMatches("#")
       .getOrElse(throw new IllegalStateException("# not found"))
     assert(firstSeed == position)
-    assert(processingMonad.rawImage.at(firstSeed) == "#")
+    assert(processingMonad.at(firstSeed) == "#")
     firstSeed
   }
 
-  def writeToFile(processingMonad: ImageProcessingMonad[String], front: List[Position], fileName: String, newContent: String = "@") =
-    processingMonad.replace(front, newContent).rawImage.writeToFile(fileName)
+  def writeToFile(processingMonad: ImageProcessingMonad[String], front: List[Position], fileName: String, newContent: String = "@"): Unit =
+    processingMonad.replace(front, newContent).writeToFile(fileName)
 
   object TestImageBuilder {
 
-    def fromString(rawContent: String): RawImage[String] = {
+    def fromString(rawContent: String): ImageProcessingMonad[String] = {
       val contents: List[List[String]] = rawContent
         .split("\n")
         .map(_.toCharArray.toList.map(_.toString))
         .toList
         .filter(_.map(_.trim).mkString.nonEmpty)
-      RawImage(contents)
+      ImageProcessingMonad(RawImage(contents))
     }
 
   }

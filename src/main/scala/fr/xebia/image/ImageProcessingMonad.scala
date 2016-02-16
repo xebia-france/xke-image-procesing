@@ -2,7 +2,28 @@ package fr.xebia.image
 
 import scala.annotation.tailrec
 
-case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
+trait BaseImageTools[U] {
+
+  val rawImage: RawImage[U]
+
+  def neighborsAndSelf(center: Position): List[Position] = rawImage.neighborsAndSelf(center)
+
+  def getFirstThatMatches(searched: U): Option[Position] =
+    getFirstThatMatchesOn(rawImage, searched)
+
+  protected def getFirstThatMatchesOn(onImage: RawImage[U], searched: U): Option[Position] =
+    onImage.getFirstThatMatches(searched)
+
+  def replace(neighborList: List[Position], value: U): ImageProcessingMonad[U] =
+    new ImageProcessingMonad(rawImage.replace(neighborList, value))
+
+  def at(pos: Position): U = rawImage.at(pos)
+
+  def writeToFile(fileName: String): Unit = rawImage.writeToFile(fileName)
+
+}
+
+case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools[U] {
 
   def countConnectedElements(contentValue: U, emptyValue: U): Int = {
     @tailrec
@@ -39,20 +60,11 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
     go(rawImage, seeds, List.empty[Position])
   }
 
-  def getFirstThatMatches(searched: U): Option[Position] =
-    getFirstThatMatchesOn(rawImage, searched)
-
-  private def getFirstThatMatchesOn(onImage: RawImage[U], searched: U): Option[Position] =
-    onImage.getFirstThatMatches(searched)
-
-  def replace(neighborList: List[Position], value: U): ImageProcessingMonad[U] =
-    ImageProcessingMonad(rawImage.replace(neighborList, value))
-
   def threshold(f: U => Boolean, replaceBy: U): ImageProcessingMonad[U] =
     map[U](cell => if (f(cell)) replaceBy else cell)
 
   def map[R](f: U => R): ImageProcessingMonad[R] = {
-    ImageProcessingMonad[R](
+    new ImageProcessingMonad[R](
       RawImage(
         rawImage.content.map(_.map(cell => f(cell)))
       )
@@ -61,3 +73,6 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) {
 
 }
 
+class IntImageProcessingMonad(override val rawImage: RawImage[Int]) extends ImageProcessingMonad(rawImage) {
+
+}
