@@ -1,20 +1,6 @@
 package fr.xebia.image
 
 import scala.annotation.tailrec
-import scala.util.Try
-
-object ImageBuilder {
-
-  def fromFile[T](fileName: String): Option[RawImage[T]] = {
-    (for {
-      input <- Try(FileTools.readImage(fileName))
-      contents <- Try(input.map(_.toCharArray.toList.map(_.asInstanceOf[T])))
-    } yield {
-      RawImage[T](contents)
-    }).toOption
-  }
-
-}
 
 case class Position(x: Int, y: Int) {
   override def toString: String = s"($x,$y)"
@@ -22,9 +8,11 @@ case class Position(x: Int, y: Int) {
 
 case class RawImage[U](content: List[List[U]]) {
 
+  require(content.nonEmpty, "Empty image")
+  require(content.map(_.size).distinct.size == 1, "Not all rows have the same size")
+
   val width = content.size
 
-  // TODO: verify if that all rows have the same size
   val height = content.head.size
 
   def getFirstThatMatches(searched: U): Option[Position] = {
@@ -77,24 +65,5 @@ case class RawImage[U](content: List[List[U]]) {
     neighborsOnly(center) :+ center
 
   def at(pos: Position): U = content(pos.x)(pos.y)
-
-  import java.io.{BufferedWriter, Closeable, FileOutputStream, OutputStreamWriter}
-
-  private def using[T <: Closeable, R](resource: T)(block: T => R): R = {
-    try {
-      block(resource)
-    }
-    finally {
-      resource.close()
-    }
-  }
-
-  def writeToFile(fileName: String): Unit = {
-    using(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName)))) { writer =>
-      for (x <- content) {
-        writer.write(x.mkString + "\n")
-      }
-    }
-  }
 
 }

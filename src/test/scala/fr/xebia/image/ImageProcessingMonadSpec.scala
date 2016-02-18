@@ -1,12 +1,11 @@
 package fr.xebia.image
 
 import fr.xebia.image.ImagingTools._
-import org.scalatest.concurrent.Futures
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.time.{Seconds, Span}
+import org.scalatest.{OptionValues, FunSpec, Matchers}
 
-import scala.concurrent.Await
-
-class ScalaTestExampleSpec extends FunSpec with Matchers with Futures {
+class ScalaTestExampleSpec extends FunSpec with Matchers with ScalaFutures {
 
   describe("a segmentation monad") {
 
@@ -48,6 +47,47 @@ class ScalaTestExampleSpec extends FunSpec with Matchers with Futures {
         """.stripMargin
       )
     }
+
+    it("should detect a missing first match in the image") {
+      val monad = TestImageBuilder.fromString(
+        """|......###........
+          |...###...##......
+          |..##.......##....
+          |..############...
+          |.................
+          |.................
+          |..############...
+          |...#########.....
+          |.....####........
+          |.................
+        """.stripMargin)
+      monad.getFirstThatMatches("&") shouldNot be(defined)
+    }
+
+    it("should detect unconnected elements in an image from disk") {
+      val monad = ImageBuilder.fromFile("/google.txt").get
+      monad.countConnectedElements(
+        contentValue = "#",
+        emptyValue = "."
+      ) shouldBe 6
+    }
+
+  }
+
+  describe("a segmentation monad executing front propagation") {
+
+    val monad = TestImageBuilder.fromString(
+      """|......###........
+        |...###...##......
+        |..##.......##....
+        |..############...
+        |.................
+        |.................
+        |..############...
+        |...#########.....
+        |.....####........
+        |.................
+      """.stripMargin)
 
     it("should propagate a front from a specified seed") {
       // given
@@ -93,31 +133,10 @@ class ScalaTestExampleSpec extends FunSpec with Matchers with Futures {
       )
     }
 
-  }
-
-  describe("a segmentation monad executing front propagation") {
-
-    val monad = TestImageBuilder.fromString(
-      """|......###........
-        |...###...##......
-        |..##.......##....
-        |..############...
-        |.................
-        |.................
-        |..############...
-        |...#########.....
-        |.....####........
-        |.................
-      """.stripMargin)
-
-    it("should detect a missing first match in the image") {
-      monad.getFirstThatMatches("&") shouldNot be(defined)
-    }
-
     it("should propagate a front from the first value that matches") {
       // given
       val firstFrontMonad = monad
-      val firstSeed = aSeedThatMatches(firstFrontMonad,  Position(0, 6), "#")
+      val firstSeed = aSeedThatMatches(firstFrontMonad, Position(0, 6), "#")
 
       // when the first monad is called
       val firstFront: List[Position] = firstFrontMonad.propagateFront(
@@ -152,7 +171,7 @@ class ScalaTestExampleSpec extends FunSpec with Matchers with Futures {
       )
     }
 
-    it("should detect several different elements in the image") {
+    it("should detect unconnected elements in an image") {
       val monad = TestImageBuilder.fromString(
         """
           |.................
@@ -161,9 +180,9 @@ class ScalaTestExampleSpec extends FunSpec with Matchers with Futures {
           |...##......##....
           |.................
           |.................
-          |..###......###...
-          |...##.....##.....
-          |.....#####.......
+          |..##........##...
+          |...##......##....
+          |.....######......
           |.................
         """.stripMargin)
       monad.countConnectedElements(
@@ -174,8 +193,9 @@ class ScalaTestExampleSpec extends FunSpec with Matchers with Futures {
 
   }
 
-  describe("a segmentation monad") {
+  describe("a exporter mechanism") {
     import scala.concurrent.ExecutionContext.Implicits.global
+    val timeout = PatienceConfiguration.Timeout(Span(2, Seconds))
 
     val monad = TestImageBuilder.fromString(
       """
@@ -192,8 +212,12 @@ class ScalaTestExampleSpec extends FunSpec with Matchers with Futures {
       """.stripMargin)
 
     it("should write a file from the matrix") {
-      import scala.concurrent.duration._
-      Await.ready(monad.writeToImage("#", "output.png"), 2.seconds)
+      import java.nio.file.{Files, Paths}
+      val fileName: String = "output.png"
+      val eventualUnit = ImageWriter.writeToImage((pixel: String) => pixel == "#", fileName, monad.rawImage)
+      whenReady(eventualUnit, timeout) { response =>
+        Files.exists(Paths.get(fileName))
+      }
     }
 
   }
@@ -212,7 +236,7 @@ object ImagingTools {
   }
 
   def writeToFile(processingMonad: ImageProcessingMonad[String], front: List[Position], fileName: String, newContent: String = "@"): Unit =
-    processingMonad.replace(front, newContent).writeToFile(fileName)
+    ImageWriter.writeToFile(fileName, processingMonad.replace(front, newContent).rawImage)
 
   object TestImageBuilder {
 
