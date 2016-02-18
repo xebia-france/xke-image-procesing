@@ -1,6 +1,11 @@
 package fr.xebia.image
 
+import java.awt.image.{BufferedImage, WritableRaster}
+import java.io.File
+import javax.imageio.ImageIO
+
 import scala.annotation.tailrec
+import scala.concurrent.{ExecutionContext, Future}
 
 trait BaseImageTools[U] {
 
@@ -20,6 +25,27 @@ trait BaseImageTools[U] {
   def at(pos: Position): U = rawImage.at(pos)
 
   def writeToFile(fileName: String): Unit = rawImage.writeToFile(fileName)
+
+  def writeToImage(contentValue: U, fileName: String)(implicit ec: ExecutionContext): Future[Unit] = {
+    Future {
+      val image = new BufferedImage(rawImage.height, rawImage.width, BufferedImage.TYPE_INT_RGB)
+      val raster = image.getData.asInstanceOf[WritableRaster]
+      rawImage.content.indices.zip(rawImage.content).toList
+        .collect { case (rowIndex, rowData) => rowData.indices.zip(rowData).collect { case (colIndex, pixel) =>
+          val pixelValue = rowIndex * 10 + 50
+          val _row = colIndex
+          val _col = rowIndex
+          if (pixel == contentValue) {
+            raster.setPixel(_row, _col, Array(pixelValue, pixelValue, pixelValue))
+          } else {
+            raster.setPixel(_row, _col, Array(0, 0, 0))
+          }
+        }
+        }
+      image.setData(raster)
+      ImageIO.write(image, "png", new File(fileName))
+    }
+  }
 
 }
 
@@ -70,9 +96,5 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools
       )
     )
   }
-
-}
-
-class IntImageProcessingMonad(override val rawImage: RawImage[Int]) extends ImageProcessingMonad(rawImage) {
 
 }

@@ -1,9 +1,12 @@
 package fr.xebia.image
 
 import fr.xebia.image.ImagingTools._
+import org.scalatest.concurrent.Futures
 import org.scalatest.{FunSpec, Matchers}
 
-class ScalaTestExampleSpec extends FunSpec with Matchers {
+import scala.concurrent.Await
+
+class ScalaTestExampleSpec extends FunSpec with Matchers with Futures {
 
   describe("a segmentation monad") {
 
@@ -172,9 +175,25 @@ class ScalaTestExampleSpec extends FunSpec with Matchers {
   }
 
   describe("a segmentation monad") {
+    import scala.concurrent.ExecutionContext.Implicits.global
 
-    it("should ") {
+    val monad = TestImageBuilder.fromString(
+      """
+        |.................
+        |...##......##....
+        |...##......##....
+        |...##......##....
+        |.................
+        |.................
+        |..##........##...
+        |...##......##....
+        |.....######......
+        |.................
+      """.stripMargin)
 
+    it("should write a file from the matrix") {
+      import scala.concurrent.duration._
+      Await.ready(monad.writeToImage("#", "output.png"), 2.seconds)
     }
 
   }

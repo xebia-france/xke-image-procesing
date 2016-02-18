@@ -22,6 +22,11 @@ case class Position(x: Int, y: Int) {
 
 case class RawImage[U](content: List[List[U]]) {
 
+  val width = content.size
+
+  // TODO: verify if that all rows have the same size
+  val height = content.head.size
+
   def getFirstThatMatches(searched: U): Option[Position] = {
     val zipped: List[(Int, List[U])] = content.indices
       .toList
