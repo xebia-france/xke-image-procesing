@@ -5,12 +5,16 @@ import scala.util.Try
 
 object ImageBuilder {
 
-  def fromFile(fileName: String): Option[ImageProcessingMonad[String]] = {
+  def StringImagefromFile(fileName: String): Option[ImageProcessingMonad[String]] =
+    fromFile[String](fileName, (pixel) => pixel.toString)
+
+
+  private def fromFile[T](fileName: String, parseChar: Char => T): Option[ImageProcessingMonad[T]] = {
     (for {
       input <- Try(FileTools.readImage(fileName))
-      contents <- Try(input.map(_.toCharArray.toList.map(_.toString)))
+      contents <- Try(input.map(_.toCharArray.toList.map(parseChar(_))))
     } yield {
-      ImageProcessingMonad[String](RawImage[String](contents))
+      ImageProcessingMonad[T](RawImage[T](contents))
     }).toOption
   }
 

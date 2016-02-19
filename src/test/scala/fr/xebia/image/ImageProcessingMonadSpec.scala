@@ -3,9 +3,9 @@ package fr.xebia.image
 import fr.xebia.image.ImagingTools._
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.{Seconds, Span}
-import org.scalatest.{OptionValues, FunSpec, Matchers}
+import org.scalatest.{FunSpec, Matchers}
 
-class ScalaTestExampleSpec extends FunSpec with Matchers with ScalaFutures {
+class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
 
   describe("a segmentation monad") {
 
@@ -65,11 +65,19 @@ class ScalaTestExampleSpec extends FunSpec with Matchers with ScalaFutures {
     }
 
     it("should detect unconnected elements in an image from disk") {
-      val monad = ImageBuilder.fromFile("/google.txt").get
+      val monad = ImageBuilder.StringImagefromFile("/google.txt").get
       monad.countConnectedElements(
         contentValue = "#",
         emptyValue = "."
       ) shouldBe 6
+    }
+
+    it("should detect the right amt of characters from a file containing 'xebia' ") {
+      val monad = ImageBuilder.StringImagefromFile("/xebia.txt").get
+      monad.countConnectedElements(
+        contentValue = "#",
+        emptyValue = "."
+      ) shouldBe 5
     }
 
   }
