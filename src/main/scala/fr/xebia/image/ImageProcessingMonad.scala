@@ -8,7 +8,6 @@ object ImageBuilder {
   def StringImagefromFile(fileName: String): Option[ImageProcessingMonad[String]] =
     fromFile[String](fileName, (pixel) => pixel.toString)
 
-
   private def fromFile[T](fileName: String, parseChar: Char => T): Option[ImageProcessingMonad[T]] = {
     (for {
       input <- Try(FileTools.readImage(fileName))
@@ -17,6 +16,14 @@ object ImageBuilder {
       ImageProcessingMonad[T](RawImage[T](contents))
     }).toOption
   }
+
+  def IntImagefromFile(fileName: String): Option[ImageProcessingMonad[Int]] =
+    (for {
+      input <- Try(FileTools.readImage(fileName))
+      contents <- Try(input.map(_.split(" ").toList.map(_.toInt)))
+    } yield {
+      ImageProcessingMonad[Int](RawImage[Int](contents))
+    }).toOption
 
 }
 
