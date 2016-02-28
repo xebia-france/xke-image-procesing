@@ -24,7 +24,7 @@ case class RawImage[U](content: List[List[U]]) {
       .map { case (index, row) => Position(index, row.indexOf(searched)) }
   }
 
-  def takeWhile(predicate: U => Boolean): List[U] =
+  private def takeWhile(predicate: U => Boolean): List[U] =
     content.collect { case (row) => row.filter(predicate(_)) }.flatten
 
   def replace(neighborList: List[Position], value: U): RawImage[U] = {
