@@ -11,3 +11,7 @@ To generate a configuration file
 To statically verify the code
 
     sbt scalastyle
+
+To generate scaladoc
+
+    sbt compile:doc
