@@ -2,10 +2,20 @@ package fr.xebia.image
 
 import scala.annotation.tailrec
 
+/**
+  * The wheel reivented for the sake of the exercise.
+  * @param x
+  * @param y
+  */
 case class Position(x: Int, y: Int) {
   override def toString: String = s"($x,$y)"
 }
 
+/**
+  * Generic image, as a list of list of pixels.
+  * @param content list of list of pixels.
+  * @tparam U the type of the pixel value.
+  */
 case class RawImage[U](content: List[List[U]]) {
 
   require(content.nonEmpty, "Empty image")
