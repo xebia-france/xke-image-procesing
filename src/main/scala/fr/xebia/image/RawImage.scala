@@ -21,9 +21,9 @@ case class RawImage[U](content: List[List[U]]) {
   require(content.nonEmpty, "Empty image")
   require(content.map(_.size).distinct.size == 1, "Not all rows have the same size")
 
-  val width = content.size
+  val width = content.head.size
 
-  val height = content.head.size
+  val height = content.size
 
   def getFirstThatMatches(searched: U): Option[Position] = {
     val zipped: List[(Int, List[U])] = content.indices
