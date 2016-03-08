@@ -87,7 +87,7 @@ trait BaseImageTools[U] {
   */
 case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools[U] {
   /**
-    * Count the number of distinguishable objects in this processed image and replaces all connected pixels in those objects by an "empty pixel" marker.
+    * Count the number of components in this processed image and replaces all connected pixels in those components by an "empty pixel" marker.
     * Example: if <code>contentValue</code is '@', the following image has a connected elements count of 2. There is 2 distinguishable objects composed of connected '@'.
     * <pre>
     * ..........
@@ -98,7 +98,7 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools
     * </pre>
     * @param contentValue the value that connected pixels must match
     * @param emptyValue  the pixel value that will mark processed pixels
-    * @return the number of distinguishable objects in this processed image (an object is a set of connected pixels).
+    * @return the number of components in this processed image (a component is a set of connected pixels).
     */
   def countConnectedElements(contentValue: U, emptyValue: U): Int = {
     @tailrec
@@ -125,7 +125,7 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools
     * @param seeds a list of position to start the lookup. Positions must be neighbors in order to find only connected pixels.
     * @param searchedValue the value that all connected pixels must match
     * @param markWith the "empty pixel" marker that will replace pixels once processed.
-    * @return the list of positions of the connected pixels (i.e. belonging to a single distinguishable object)
+    * @return the list of positions of the connected pixels (i.e. belonging to a single component)
     */
   private[image] def propagateFront(seeds: List[Position], searchedValue: U, markWith: U): List[Position] = {
     @tailrec

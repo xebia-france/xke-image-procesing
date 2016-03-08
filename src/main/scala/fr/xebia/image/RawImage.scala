@@ -25,6 +25,11 @@ case class RawImage[U](content: List[List[U]]) {
 
   val height = content.size
 
+  /**
+    *
+    * @param searched the searched pixel value
+    * @return the position of the first matching pixel. Pretty straightforward, isn't it ?
+    */
   def getFirstThatMatches(searched: U): Option[Position] = {
     val zipped: List[(Int, List[U])] = content.indices
       .toList
@@ -37,6 +42,12 @@ case class RawImage[U](content: List[List[U]]) {
   private def takeWhile(predicate: U => Boolean): List[U] =
     content.collect { case (row) => row.filter(predicate(_)) }.flatten
 
+  /**
+    * Replace the pixels at the specified position by the specified pixel value.
+    * @param neighborList the position where pixel value must be replaced
+    * @param value the new pixel value to erase the specified neighborList with
+    * @return an updated image with specified pixels replaced by specified value.
+    */
   def replace(neighborList: List[Position], value: U): RawImage[U] = {
     @tailrec
     def go(updatedImage: RawImage[U], remainingNeighbor: List[Position]): RawImage[U] = {
@@ -54,6 +65,11 @@ case class RawImage[U](content: List[List[U]]) {
     go(this, neighborList)
   }
 
+  /**
+    *
+    * @param center
+    * @return positions of neighbors pixels around specified <code>center</code>
+    */
   def neighborsOnly(center: Position): List[Position] = {
     val neigh = scala.collection.mutable.ArrayBuffer.empty[Position]
     neigh += center.copy(x = center.x - 1, y = center.y - 1)
@@ -70,7 +86,11 @@ case class RawImage[U](content: List[List[U]]) {
       .filter(pos => pos.x >= 0 && pos.y >= 0)
       .filter(pos => pos.x < content.size && pos.y < content.head.size)
   }
-
+  /**
+    *
+    * @param center
+    * @return the position of the specified <code>center</code> and all its neighbors pixels
+    */
   def neighborsAndSelf(center: Position): List[Position] =
     neighborsOnly(center) :+ center
 
