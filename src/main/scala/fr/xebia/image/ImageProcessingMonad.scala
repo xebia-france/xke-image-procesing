@@ -60,7 +60,7 @@ trait BaseImageTools[U] {
     getFirstThatMatchesOn(rawImage, searched)
 
   protected def getFirstThatMatchesOn(onImage: RawImage[U], searched: U): Option[Position] =
-    onImage.getFirstThatMatches(searched)
+    onImage.firstThatMatches(searched)
 
   /**
     * Return a new image processing where pixels at the specified positions have been replaced by

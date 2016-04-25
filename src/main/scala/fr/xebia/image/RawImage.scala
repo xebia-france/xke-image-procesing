@@ -25,11 +25,6 @@ case class RawImage[U](content: List[List[U]]) {
 
   val height = content.size
 
-  /**
-    *
-    * @param searched the searched pixel value
-    * @return the position of the first matching pixel. Pretty straightforward, isn't it ?
-    */
   def getFirstThatMatches(searched: U): Option[Position] = {
     val zipped: List[(Int, List[U])] = content.indices
       .toList
@@ -66,8 +61,6 @@ case class RawImage[U](content: List[List[U]]) {
   }
 
   /**
-    *
-    * @param center
     * @return positions of neighbors pixels around specified <code>center</code>
     */
   def neighborsOnly(center: Position): List[Position] = {
@@ -86,8 +79,8 @@ case class RawImage[U](content: List[List[U]]) {
       .filter(pos => pos.x >= 0 && pos.y >= 0)
       .filter(pos => pos.x < content.size && pos.y < content.head.size)
   }
+
   /**
-    *
     * @param center
     * @return the position of the specified <code>center</code> and all its neighbors pixels
     */

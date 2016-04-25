@@ -1,6 +1,7 @@
 package fr.xebia.image
 
-import fr.xebia.image.ImagingTools._
+import fr.xebia.image.TestFactory.ImagingTools._
+import fr.xebia.image.TestFactory._
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
@@ -11,7 +12,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
 
     it("should replace '#' by '@'") {
       // given an image
-      val monad = TestImageBuilder.fromString(
+      val monad = anImageWrapperFrom(
         """
           |......###........
           |...###...##......
@@ -32,7 +33,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
       )
 
       // then
-      segmentedImg shouldBe TestImageBuilder.fromString(
+      segmentedImg shouldBe anImageWrapperFrom(
         """
           |......@@@........
           |...@@@...@@......
@@ -49,7 +50,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
     }
 
     it("should detect a missing first match in the image") {
-      val monad = TestImageBuilder.fromString(
+      val monad = anImageWrapperFrom(
         """|......###........
           |...###...##......
           |..##.......##....
@@ -84,7 +85,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
 
   describe("a segmentation monad executing front propagation") {
 
-    val monad = TestImageBuilder.fromString(
+    val anImageWrapper = anImageWrapperFrom(
       """|......###........
         |...###...##......
         |..##.......##....
@@ -103,7 +104,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
       val seed = Position(0, 7)
 
       // when
-      val monad = TestImageBuilder.fromString(
+      val anImageWrapper = anImageWrapperFrom(
         """
           |......###........
           |...###...##......
@@ -117,15 +118,15 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
           |.................
         """.stripMargin)
 
-      val segmentedPositions = monad.propagateFront(
-        seeds = monad.neighborsAndSelf(seed),
+      val segmentedPositions = anImageWrapper.propagateFront(
+        seeds = anImageWrapper.neighborsAndSelf(seed),
         searchedValue = "#",
         markWith = specialChar
       )
-      val segmentedImage = monad.replace(segmentedPositions, specialChar)
+      val segmentedImage = anImageWrapper.replace(segmentedPositions, specialChar)
 
       // then
-      segmentedImage shouldBe TestImageBuilder.fromString(
+      segmentedImage shouldBe anImageWrapperFrom(
         """
           |......@@@........
           |...@@@...@@......
@@ -143,7 +144,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
 
     it("should propagate a front from the first value that matches") {
       // given
-      val firstFrontMonad = monad
+      val firstFrontMonad = anImageWrapper
       val firstSeed = aSeedThatMatches(firstFrontMonad, Position(0, 6), "#")
 
       // when the first monad is called
@@ -163,7 +164,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
         searchedValue = "#",
         markWith = "&"
       )
-      secondFrontMonad.replace(secondFront, "&") shouldBe TestImageBuilder.fromString(
+      secondFrontMonad.replace(secondFront, "&") shouldBe anImageWrapperFrom(
         """
           |......@@@........
           |...@@@...@@......
@@ -180,7 +181,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
     }
 
     it("should detect unconnected elements in an image") {
-      val monad = TestImageBuilder.fromString(
+      val monad = anImageWrapperFrom(
         """
           |.................
           |...##......##....
@@ -208,7 +209,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
     it("should read and write a String image") {
       import java.nio.file.{Files, Paths}
       val fileName: String = "output.png"
-      val monad = TestImageBuilder.fromString(
+      val monad = anImageWrapperFrom(
         """
           |.................
           |...##......##....
@@ -244,35 +245,6 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
       whenReady(eventualUnit, timeout) { response =>
         Files.exists(Paths.get(fileName))
       }
-    }
-
-  }
-
-}
-
-object ImagingTools {
-
-  def aSeedThatMatches(processingMonad: ImageProcessingMonad[String], position: Position, expectedValue: String): Position = {
-    val firstSeed = processingMonad
-      .getFirstThatMatches("#")
-      .getOrElse(throw new IllegalStateException("# not found"))
-    assert(firstSeed == position)
-    assert(processingMonad.at(firstSeed) == "#")
-    firstSeed
-  }
-
-  def writeToFile(processingMonad: ImageProcessingMonad[String], front: List[Position], fileName: String, newContent: String = "@"): Unit =
-    ImageWriter.writeToFile(fileName, processingMonad.replace(front, newContent).rawImage)
-
-  object TestImageBuilder {
-
-    def fromString(rawContent: String): ImageProcessingMonad[String] = {
-      val contents: List[List[String]] = rawContent
-        .split("\n")
-        .map(_.toCharArray.toList.map(_.toString))
-        .toList
-        .filter(_.map(_.trim).mkString.nonEmpty)
-      ImageProcessingMonad(RawImage(contents))
     }
 
   }
