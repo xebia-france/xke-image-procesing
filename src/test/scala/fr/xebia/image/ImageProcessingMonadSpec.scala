@@ -65,6 +65,19 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
       monad.getFirstThatMatches("&") shouldNot be(defined)
     }
 
+    it("should propagate front from a simple image") {
+      val aContent =
+        """
+          |-#--#----
+          |-#--#--#-
+          |-#--#--#-
+          |-#--#----
+        """.stripMargin
+      val anImageWrapper = anImageWrapperFrom(aContent)
+      anImageWrapper.countConnectedElements("#", "-") shouldBe 3
+    }
+
+
     it("should detect unconnected elements in an image from disk") {
       val monad = ImageBuilder.StringImagefromFile("/google.txt").get
       monad.countConnectedElements(
@@ -84,7 +97,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
   }
 
   describe("a segmentation monad executing front propagation") {
-
+pending
     val anImageWrapper = anImageWrapperFrom(
       """|......###........
         |...###...##......

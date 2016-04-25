@@ -86,6 +86,7 @@ trait BaseImageTools[U] {
   * @tparam U the type of the pixel value
   */
 case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools[U] {
+
   /**
     * Count the number of components in this processed image and replaces all connected pixels in those components by an "empty pixel" marker.
     * Example: if <code>contentValue</code is '@', the following image has a connected elements count of 2. There is 2 distinguishable objects composed of connected '@'.
@@ -120,7 +121,7 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools
     go(this.rawImage, getFirstThatMatches(contentValue), 0)
   }
 
-  /**
+  /*
     * Helper function to find all connected pixels with the specified value.
     * @param seeds a list of position to start the lookup. Positions must be neighbors in order to find only connected pixels.
     * @param searchedValue the value that all connected pixels must match
@@ -143,7 +144,7 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools
   }
 
   /**
-    * Replace pixels that fulfill the specified predicate.
+    * Replace pixels that match the specified predicate.
     *
     * @param p the predicate
     * @param replaceBy the pixel value that will replace pixels matching predicate <code>p</code>
@@ -153,7 +154,7 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools
     map[U](cell => if (p(cell)) replaceBy else cell)
 
   /**
-    * Change image type.
+    * Change image
     * @param f the mapping function (converts a pixel of one type to another)
     * @tparam R the type of the pixel value in the resulting image
     * @return the processing monad for the converted image

@@ -97,7 +97,7 @@ case class RawImage[U](content: List[List[U]]) {
     neigh
       .toList
       .filter(pos => pos.x >= 0 && pos.y >= 0)
-      .filter(pos => pos.x < content.size && pos.y < content.head.size)
+      .filter(pos => pos.x < width && pos.y < height)
   }
 
   /**
