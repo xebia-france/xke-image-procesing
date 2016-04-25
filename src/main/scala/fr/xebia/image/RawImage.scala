@@ -23,14 +23,10 @@ case class RawImage[U](content: List[List[U]]) {
 
   val height = content.size
 
-<<<<<<< afe70684fbe14ede71bca811df4422d3413ebc94
-  def getFirstThatMatches(searched: U): Option[Position] = {
-=======
   /**
     * Get the first element that matches following a left-right / up-down strategy
     */
   def firstThatMatches(searched: U): Option[Position] = {
->>>>>>> WIP fixes some tests
     val zipped: List[(Int, List[U])] = content.indices
       .toList
       .zip(content)
@@ -43,14 +39,10 @@ case class RawImage[U](content: List[List[U]]) {
     content.collect { case (row) => row.filter(predicate(_)) }.flatten
 
   /**
-<<<<<<< afe70684fbe14ede71bca811df4422d3413ebc94
     * Replace the pixels at the specified position by the specified pixel value.
     * @param neighborList the position where pixel value must be replaced
     * @param value the new pixel value to erase the specified neighborList with
     * @return an updated image with specified pixels replaced by specified value.
-=======
-    * Replace a bunch of position with the value specified
->>>>>>> WIP fixes some tests
     */
   def replace(neighborList: List[Position], value: U): RawImage[U] = {
     @tailrec
@@ -69,11 +61,6 @@ case class RawImage[U](content: List[List[U]]) {
     go(this, neighborList)
   }
 
-<<<<<<< afe70684fbe14ede71bca811df4422d3413ebc94
-  /**
-    * @return positions of neighbors pixels around specified <code>center</code>
-    */
-=======
   private def replaceValueInContent(position: Position, currentImage: RawImage[U], newValue: U): List[List[U]] = {
     val valueReplaced = currentImage.content(position.y).updated(position.x, newValue)
     currentImage.content.updated(
@@ -82,7 +69,6 @@ case class RawImage[U](content: List[List[U]]) {
     )
   }
 
->>>>>>> WIP fixes some tests
   def neighborsOnly(center: Position): List[Position] = {
     val neigh = scala.collection.mutable.ArrayBuffer.empty[Position]
     neigh += center.copy(x = center.x - 1, y = center.y - 1)
