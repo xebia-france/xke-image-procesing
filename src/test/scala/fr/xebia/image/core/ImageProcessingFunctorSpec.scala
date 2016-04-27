@@ -68,6 +68,35 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
         aFunctor.firstThatMatches("&") shouldNot be(defined)
       }
 
+      it("should apply threshold on a matching predicate") {
+        val anImageFunctor = anImageFunctorFrom(
+          """
+            |-#--#----
+            |-#--#--#-
+            |-#--#--#-
+            |-#--#----
+          """.stripMargin)
+        val expectedContent = anImageFunctorFrom(
+          """
+            |---------
+            |---------
+            |---------
+            |---------
+          """.stripMargin
+        )
+        anImageFunctor.threshold(
+          predicate = (p) => p == "#",
+          replaceBy = "-") shouldBe expectedContent
+      }
+
+      it("should not apply threshold if none match the predicate") {
+        val anImageFunctor = anImageFunctorFrom("-#--#----")
+        val expectedContent = anImageFunctorFrom("-#--#----")
+        anImageFunctor.threshold(
+          predicate = (p) => p == "@",
+          replaceBy = "-") shouldBe expectedContent
+      }
+
       it("should propagate a front from a simple image") {
         val aContent =
           """

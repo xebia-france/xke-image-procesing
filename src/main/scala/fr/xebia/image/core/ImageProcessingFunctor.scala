@@ -114,16 +114,16 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) extends BaseImageToo
   /**
     * Replace pixels that match the specified predicate.
     *
-    * @param p the predicate
+    * @param predicate the predicate
     * @param replaceBy the pixel value that will replace pixels matching predicate <code>p</code>
     * @return a new processing functor where pixels fulfilling <code>p</code> have been replaced by <code>replaceBy</code>
     */
-  def threshold(p: U => Boolean, replaceBy: U): ImageProcessingFunctor[U] =
-    map[U](cell => if (p(cell)) replaceBy else cell)
+  def threshold(predicate: U => Boolean, replaceBy: U): ImageProcessingFunctor[U] =
+    map[U](cell => if (predicate(cell)) replaceBy else cell)
 
   /**
     * Change image
- *
+    *
     * @param f the mapping function (converts a pixel of one type to another)
     * @tparam R the type of the pixel value in the resulting image
     * @return the processing functor for the converted image
