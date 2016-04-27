@@ -1,7 +1,6 @@
-package fr.xebia.image
+package fr.xebia.image.core
 
 import fr.xebia.image.TestFactory.aStringImage
-import fr.xebia.image.core.{Position, RawImage}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, Matchers}
 

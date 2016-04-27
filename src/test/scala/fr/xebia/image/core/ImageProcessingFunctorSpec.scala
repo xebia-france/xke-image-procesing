@@ -1,20 +1,20 @@
-package fr.xebia.image
+package fr.xebia.image.core
 
+import fr.xebia.image.ImageBuilder
 import fr.xebia.image.TestFactory.ImagingTools._
 import fr.xebia.image.TestFactory._
-import fr.xebia.image.core.Position
 import fr.xebia.image.export.{GrayGradientOnHeight, ImageWriter, Rainbow}
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 
-class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
+class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures {
 
-  describe("a segmentation monad") {
+  describe("a segmentation functor") {
 
     it("should replace '#' by '@'") {
       // given an image
-      val monad = anImageWrapperFrom(
+      val functor = anImageWrapperFrom(
         """
           |......###........
           |...###...##......
@@ -29,7 +29,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
         """.stripMargin)
 
       // when
-      val segmentedImg = monad.threshold(
+      val segmentedImg = functor.threshold(
         cell => cell == "#",
         replaceBy = "@"
       )
@@ -52,7 +52,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
     }
 
     it("should detect a missing first match in the image") {
-      val monad = anImageWrapperFrom(
+      val functor = anImageWrapperFrom(
         """|......###........
           |...###...##......
           |..##.......##....
@@ -64,7 +64,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
           |.....####........
           |.................
         """.stripMargin)
-      monad.getFirstThatMatches("&") shouldNot be(defined)
+      functor.getFirstThatMatches("&") shouldNot be(defined)
     }
 
     it("should propagate front from a simple image") {
@@ -81,16 +81,16 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
 
 
     it("should detect unconnected elements in an image from disk") {
-      val monad = ImageBuilder.StringImagefromFile("/google.txt").get
-      monad.countConnectedElements(
+      val functor = ImageBuilder.StringImagefromFile("/google.txt").get
+      functor.countConnectedElements(
         contentValue = "#",
         emptyValue = "."
       ) shouldBe 6
     }
 
     it("should detect the right amt of characters from a file containing 'xebia' ") {
-      val monad = ImageBuilder.StringImagefromFile("/xebia.txt").get
-      monad.countConnectedElements(
+      val functor = ImageBuilder.StringImagefromFile("/xebia.txt").get
+      functor.countConnectedElements(
         contentValue = "#",
         emptyValue = "."
       ) shouldBe 5
@@ -98,7 +98,7 @@ class ImageProcessingMonadSpec extends FunSpec with Matchers with ScalaFutures {
 
   }
 
-  describe("a segmentation monad executing front propagation") {
+  describe("a segmentation functor executing front propagation") {
 pending
     val anImageWrapper = anImageWrapperFrom(
       """|......###........
@@ -159,27 +159,27 @@ pending
 
     it("should propagate a front from the first value that matches") {
       // given
-      val firstFrontMonad = anImageWrapper
-      val firstSeed = aSeedThatMatches(firstFrontMonad, Position(0, 6), "#")
+      val firstFrontfunctor = anImageWrapper
+      val firstSeed = aSeedThatMatches(firstFrontfunctor, Position(0, 6), "#")
 
-      // when the first monad is called
-      val firstFront: List[Position] = firstFrontMonad.propagateFront(
+      // when the first functor is called
+      val firstFront: List[Position] = firstFrontfunctor.propagateFront(
         seeds = List(firstSeed),
         searchedValue = "#",
         markWith = "@"
       )
       firstFront shouldNot be(empty)
 
-      // when the second monad
-      val secondFrontMonad = firstFrontMonad.replace(firstFront, "@")
-      val secondSeed = aSeedThatMatches(secondFrontMonad, Position(6, 2), "#")
+      // when the second functor
+      val secondFrontfunctor = firstFrontfunctor.replace(firstFront, "@")
+      val secondSeed = aSeedThatMatches(secondFrontfunctor, Position(6, 2), "#")
 
-      val secondFront: List[Position] = secondFrontMonad.propagateFront(
+      val secondFront: List[Position] = secondFrontfunctor.propagateFront(
         seeds = List(secondSeed),
         searchedValue = "#",
         markWith = "&"
       )
-      secondFrontMonad.replace(secondFront, "&") shouldBe anImageWrapperFrom(
+      secondFrontfunctor.replace(secondFront, "&") shouldBe anImageWrapperFrom(
         """
           |......@@@........
           |...@@@...@@......
@@ -196,7 +196,7 @@ pending
     }
 
     it("should detect unconnected elements in an image") {
-      val monad = anImageWrapperFrom(
+      val functor = anImageWrapperFrom(
         """
           |.................
           |...##......##....
@@ -209,7 +209,7 @@ pending
           |.....######......
           |.................
         """.stripMargin)
-      monad.countConnectedElements(
+      functor.countConnectedElements(
         contentValue = "#",
         emptyValue = "."
       ) shouldBe 3
@@ -224,7 +224,7 @@ pending
     it("should read and write a String image") {
       import java.nio.file.{Files, Paths}
       val fileName: String = "output.png"
-      val monad = anImageWrapperFrom(
+      val functor = anImageWrapperFrom(
         """
           |.................
           |...##......##....
@@ -240,7 +240,7 @@ pending
 
       val eventualUnit = ImageWriter.writeToImage(
         fileName,
-        monad.rawImage,
+        functor.rawImage,
         (pixel: String) => pixel == "#",
         GrayGradientOnHeight)
       whenReady(eventualUnit, timeout) { response =>
@@ -251,10 +251,10 @@ pending
     it("should read and write an Int image") {
       import java.nio.file.{Files, Paths}
       val fileName: String = "outputColor.png"
-      val numberMonad = ImageBuilder.IntImagefromFile("/input.txt").get
+      val numberfunctor = ImageBuilder.IntImagefromFile("/input.txt").get
       val eventualUnit = ImageWriter.writeToImage(
         fileName,
-        numberMonad.rawImage,
+        numberfunctor.rawImage,
         (pixel: Int) => pixel == 255,
         Rainbow)
       whenReady(eventualUnit, timeout) { response =>

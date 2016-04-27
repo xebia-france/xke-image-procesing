@@ -3,7 +3,8 @@ package fr.xebia.image.core
 import scala.annotation.tailrec
 
 /**
-  * The base trait for the image processing monad.
+  * The base trait for the image processing functor.
+ *
   * @tparam U the type of the pixel value
   */
 trait BaseImageTools[U] {
@@ -29,12 +30,13 @@ trait BaseImageTools[U] {
   /**
     * Return a new image processing where pixels at the specified positions have been replaced by
     * the specified pixel value.
+ *
     * @param neighborList list of target position of pixels to be replaced
     * @param value the pixel value that will replace the specified positions values
     * @return a new image processing where pixels at the specified positions have the specified value
     */
-  def replace(neighborList: List[Position], value: U): ImageProcessingMonad[U] =
-    new ImageProcessingMonad(rawImage.replace(neighborList, value))
+  def replace(neighborList: List[Position], value: U): ImageProcessingFunctor[U] =
+    new ImageProcessingFunctor(rawImage.replace(neighborList, value))
 
   /**
     * @param pos the requested position
@@ -45,11 +47,12 @@ trait BaseImageTools[U] {
 }
 
 /**
-  * A monad to process images. It extends {@link BaseImageTools} with operations dedicated to the detection of connected elements.
+  * A functor to process images. It extends {@link BaseImageTools} with operations dedicated to the detection of connected elements.
+ *
   * @param rawImage
   * @tparam U the type of the pixel value
   */
-case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools[U] {
+case class ImageProcessingFunctor[U](rawImage: RawImage[U]) extends BaseImageTools[U] {
 
   /**
     * Count the number of components in this processed image and replaces all connected pixels in those components by an "empty pixel" marker.
@@ -61,6 +64,7 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools
     * ..@@...@..
     * ..........
     * </pre>
+ *
     * @param contentValue the value that connected pixels must match
     * @param emptyValue  the pixel value that will mark processed pixels
     * @return the number of components in this processed image (a component is a set of connected pixels).
@@ -112,19 +116,20 @@ case class ImageProcessingMonad[U](rawImage: RawImage[U]) extends BaseImageTools
     *
     * @param p the predicate
     * @param replaceBy the pixel value that will replace pixels matching predicate <code>p</code>
-    * @return a new processing monad where pixels fulfilling <code>p</code> have been replaced by <code>replaceBy</code>
+    * @return a new processing functor where pixels fulfilling <code>p</code> have been replaced by <code>replaceBy</code>
     */
-  def threshold(p: U => Boolean, replaceBy: U): ImageProcessingMonad[U] =
+  def threshold(p: U => Boolean, replaceBy: U): ImageProcessingFunctor[U] =
     map[U](cell => if (p(cell)) replaceBy else cell)
 
   /**
     * Change image
+ *
     * @param f the mapping function (converts a pixel of one type to another)
     * @tparam R the type of the pixel value in the resulting image
-    * @return the processing monad for the converted image
+    * @return the processing functor for the converted image
     */
-  def map[R](f: U => R): ImageProcessingMonad[R] = {
-    new ImageProcessingMonad[R](
+  def map[R](f: U => R): ImageProcessingFunctor[R] = {
+    new ImageProcessingFunctor[R](
       RawImage(
         rawImage.content.map(_.map(cell => f(cell)))
       )
