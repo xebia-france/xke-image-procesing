@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 
 /**
   * The base trait for the image processing functor.
- *
+  *
   * @tparam U the type of the pixel value
   */
 trait BaseImageTools[U] {
@@ -21,7 +21,7 @@ trait BaseImageTools[U] {
     * @param searched a specific pixel value that we are looking for
     * @return the position of the first pixel from this image processing matching the given pixel value or None if not found
     */
-  def getFirstThatMatches(searched: U): Option[Position] =
+  def firstThatMatches(searched: U): Option[Position] =
     getFirstThatMatchesOn(rawImage, searched)
 
   protected def getFirstThatMatchesOn(onImage: RawImage[U], searched: U): Option[Position] =
@@ -30,7 +30,7 @@ trait BaseImageTools[U] {
   /**
     * Return a new image processing where pixels at the specified positions have been replaced by
     * the specified pixel value.
- *
+    *
     * @param neighborList list of target position of pixels to be replaced
     * @param value the pixel value that will replace the specified positions values
     * @return a new image processing where pixels at the specified positions have the specified value
@@ -64,7 +64,7 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) extends BaseImageToo
     * ..@@...@..
     * ..........
     * </pre>
- *
+    *
     * @param contentValue the value that connected pixels must match
     * @param emptyValue  the pixel value that will mark processed pixels
     * @return the number of components in this processed image (a component is a set of connected pixels).
@@ -86,7 +86,7 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) extends BaseImageToo
           go(newImage, getFirstThatMatchesOn(newImage, contentValue), connectedElements + 1)
       }
     }
-    go(this.rawImage, getFirstThatMatches(contentValue), 0)
+    go(this.rawImage, firstThatMatches(contentValue), 0)
   }
 
   /*

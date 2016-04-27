@@ -11,7 +11,7 @@ object TestFactory {
 
   def aStringImage = ImageBuilder()
 
-  def anImageWrapperFrom(rawContent: String): ImageProcessingFunctor[String] = {
+  def anImageFunctorFrom(rawContent: String): ImageProcessingFunctor[String] = {
     val contents: List[List[String]] = rawContent
       .split("\n")
       .map(_.toCharArray.toList.map(_.toString))
@@ -24,7 +24,7 @@ object TestFactory {
 
     def aSeedThatMatches(processingMonad: ImageProcessingFunctor[String], position: Position, expectedValue: String): Position = {
       val firstSeed = processingMonad
-        .getFirstThatMatches("#")
+        .firstThatMatches("#")
         .getOrElse(throw new IllegalStateException("# not found"))
       assert(firstSeed == position)
       assert(processingMonad.at(firstSeed) == "#")
