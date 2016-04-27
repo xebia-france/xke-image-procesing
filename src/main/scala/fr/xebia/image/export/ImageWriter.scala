@@ -38,11 +38,11 @@ object ImageWriter {
 
   /**
     * Write a 24 bit RGB png image, given a filter and a color chooser.
- *
+    *
     * @param fileName file path.
     * @param rawImage image content
     * @param keepValue filter function that must return <code>true</code> for pixel value to keep, <code>false</code> for pixel value to be erased (will be replaced by black (0,0,0))
-    * @param colorDecider maps a position in the image to a 24 bits RGB pixel (as an INt tuple)
+    * @param colorDecider maps a position in the image to a 24 bits RGB pixel (as an Int tuple)
     * @param ec execution context for Futures, implicit
     * @tparam U type of pixel value
     * @return a Future to follow operation completion (Success or Failure) but no value is hold inside the returned Future.
@@ -55,7 +55,6 @@ object ImageWriter {
         .collect { case (rowIndex, rowData) =>
           (0 until rawImage.width).zip(rowData).collect { case (colIndex, pixel) =>
             val (pixelR, pixelG, pixelB) = colorDecider.decide(rowIndex, colIndex)
-            //Remember RawImage is adressed as (row, col) so it must be reversed to give (x,y) in screen coordinates
             val x = colIndex
             val y = rowIndex
             if (keepValue(pixel)) {

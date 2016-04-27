@@ -13,17 +13,8 @@ object ImageBuilder {
     * @param fileName a resource path (must be in the classpath)
     * @return Some image processing functor for an image where pixels are characters, or None if any loading error occurs
     */
-  def StringImagefromFile(fileName: String): Option[ImageProcessingFunctor[String]] =
+  def StringImageFromFile(fileName: String): Try[ImageProcessingFunctor[String]] =
     fromFile[String](fileName, (pixel) => pixel.toString)
-
-  private def fromFile[T](fileName: String, parseChar: Char => T): Option[ImageProcessingFunctor[T]] = {
-    (for {
-      input <- Try(FileTools.readImage(fileName))
-      contents <- Try(input.map(_.toCharArray.toList.map(parseChar(_))))
-    } yield {
-      ImageProcessingFunctor[T](RawImage[T](contents))
-    }).toOption
-  }
 
   /**
     * Build an image processing functor from text file path.
@@ -32,12 +23,20 @@ object ImageBuilder {
     * @param fileName a resource path (must be in the classpath)
     * @return Some image processing functor for an image where pixels are integers, or None if any loading error occurs
     */
-  def IntImagefromFile(fileName: String): Option[ImageProcessingFunctor[Int]] =
-    (for {
+  def IntImageFromFile(fileName: String): Try[ImageProcessingFunctor[Int]] =
+    for {
       input <- Try(FileTools.readImage(fileName))
       contents <- Try(input.map(_.split(" ").toList.map(_.toInt)))
     } yield {
       ImageProcessingFunctor[Int](RawImage[Int](contents))
-    }).toOption
+    }
 
+  private def fromFile[T](fileName: String, parseChar: Char => T): Try[ImageProcessingFunctor[T]] = {
+    for {
+      input <- Try(FileTools.readImage(fileName))
+      contents <- Try(input.map(_.toCharArray.toList.map(parseChar(_))))
+    } yield {
+      ImageProcessingFunctor[T](RawImage[T](contents))
+    }
+  }
 }

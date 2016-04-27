@@ -68,7 +68,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
         aFunctor.firstThatMatches("&") shouldNot be(defined)
       }
 
-      it("should propagate front from a simple image") {
+      it("should propagate a front from a simple image") {
         val aContent =
           """
             |-#--#----
@@ -85,7 +85,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
     describe("reading files") {
 
       it("should detect unconnected elements in an image from disk") {
-        val aFunctor = ImageBuilder.StringImagefromFile("/google.txt").get
+        val aFunctor = ImageBuilder.StringImageFromFile("/google.txt").get
         aFunctor.countConnectedElements(
           contentValue = "#",
           emptyValue = "."
@@ -93,7 +93,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
       }
 
       it("should detect the right amt of characters from a file containing 'xebia' ") {
-        val aFunctor = ImageBuilder.StringImagefromFile("/xebia.txt").get
+        val aFunctor = ImageBuilder.StringImageFromFile("/xebia.txt").get
         aFunctor.countConnectedElements(
           contentValue = "#",
           emptyValue = "."
@@ -258,7 +258,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
     it("should read and write an Int image") {
       import java.nio.file.{Files, Paths}
       val aFileName = "outputColor.png"
-      val aNumericImageFunctor = ImageBuilder.IntImagefromFile("/input.txt").get
+      val aNumericImageFunctor = ImageBuilder.IntImageFromFile("/input.txt").get
       val eventualResponse = ImageWriter.writeToImage(
         aFileName,
         aNumericImageFunctor.rawImage,

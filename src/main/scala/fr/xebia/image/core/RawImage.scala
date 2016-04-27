@@ -2,11 +2,11 @@ package fr.xebia.image.core
 
 import scala.annotation.tailrec
 
-/**
-  * The wheel reivented for the sake of the exercise
-  */
-case class Position(x: Int, y: Int) {
+case class Position(x: Int, y: Int) extends Ordered[Position] {
   override def toString: String = s"($x,$y)"
+
+  import scala.math.Ordered.orderingToOrdered
+  override def compare(that: Position): Int = (this.x, this.y) compare (that.x, that.y)
 }
 
 /**
@@ -34,9 +34,6 @@ case class RawImage[U](content: List[List[U]]) {
       .find { case (y, xValues) => xValues.contains(searched) }
       .map { case (y, xValues) => Position(xValues.indexOf(searched), y) }
   }
-
-  private def takeWhile(predicate: U => Boolean): List[U] =
-    content.collect { case (row) => row.filter(predicate(_)) }.flatten
 
   /**
     * Replace the pixels at the specified position by the specified pixel value.
@@ -69,6 +66,10 @@ case class RawImage[U](content: List[List[U]]) {
     )
   }
 
+  /**
+    * @param center searched position
+    * @return all the neighbors pixels of the searched position
+    */
   def neighborsOnly(center: Position): List[Position] = {
     val neigh = scala.collection.mutable.ArrayBuffer.empty[Position]
     neigh += center.copy(x = center.x - 1, y = center.y - 1)
@@ -87,7 +88,7 @@ case class RawImage[U](content: List[List[U]]) {
   }
 
   /**
-    * @param center
+    * @param center searched position
     * @return the position of the specified <code>center</code> and all its neighbors pixels
     */
   def neighborsAndSelf(center: Position): List[Position] =
