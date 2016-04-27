@@ -27,7 +27,6 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
           |.....####........
           |.................
         """.stripMargin)
-
       // when
       val segmentedImg = functor.threshold(
         cell => cell == "#",
@@ -52,7 +51,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
     }
 
     it("should detect a missing first match in the image") {
-      val functor = anImageWrapperFrom(
+      val aFunctor = anImageWrapperFrom(
         """|......###........
           |...###...##......
           |..##.......##....
@@ -64,7 +63,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
           |.....####........
           |.................
         """.stripMargin)
-      functor.getFirstThatMatches("&") shouldNot be(defined)
+      aFunctor.getFirstThatMatches("&") shouldNot be(defined)
     }
 
     it("should propagate front from a simple image") {
@@ -81,16 +80,16 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
 
 
     it("should detect unconnected elements in an image from disk") {
-      val functor = ImageBuilder.StringImagefromFile("/google.txt").get
-      functor.countConnectedElements(
+      val aFunctor = ImageBuilder.StringImagefromFile("/google.txt").get
+      aFunctor.countConnectedElements(
         contentValue = "#",
         emptyValue = "."
       ) shouldBe 6
     }
 
     it("should detect the right amt of characters from a file containing 'xebia' ") {
-      val functor = ImageBuilder.StringImagefromFile("/xebia.txt").get
-      functor.countConnectedElements(
+      val aFunctor = ImageBuilder.StringImagefromFile("/xebia.txt").get
+      aFunctor.countConnectedElements(
         contentValue = "#",
         emptyValue = "."
       ) shouldBe 5
@@ -119,7 +118,7 @@ pending
       val seed = Position(0, 7)
 
       // when
-      val anImageWrapper = anImageWrapperFrom(
+      val anImageFunctor = anImageWrapperFrom(
         """
           |......###........
           |...###...##......
@@ -133,12 +132,12 @@ pending
           |.................
         """.stripMargin)
 
-      val segmentedPositions = anImageWrapper.propagateFront(
-        seeds = anImageWrapper.neighborsAndSelf(seed),
+      val segmentedPositions = anImageFunctor.propagateFront(
+        seeds = anImageFunctor.neighborsAndSelf(seed),
         searchedValue = "#",
         markWith = specialChar
       )
-      val segmentedImage = anImageWrapper.replace(segmentedPositions, specialChar)
+      val segmentedImage = anImageFunctor.replace(segmentedPositions, specialChar)
 
       // then
       segmentedImage shouldBe anImageWrapperFrom(
@@ -159,11 +158,11 @@ pending
 
     it("should propagate a front from the first value that matches") {
       // given
-      val firstFrontfunctor = anImageWrapper
-      val firstSeed = aSeedThatMatches(firstFrontfunctor, Position(0, 6), "#")
+      val firstFrontFunctor = anImageWrapper
+      val firstSeed = aSeedThatMatches(firstFrontFunctor, Position(0, 6), "#")
 
       // when the first functor is called
-      val firstFront: List[Position] = firstFrontfunctor.propagateFront(
+      val firstFront: List[Position] = firstFrontFunctor.propagateFront(
         seeds = List(firstSeed),
         searchedValue = "#",
         markWith = "@"
@@ -171,15 +170,15 @@ pending
       firstFront shouldNot be(empty)
 
       // when the second functor
-      val secondFrontfunctor = firstFrontfunctor.replace(firstFront, "@")
-      val secondSeed = aSeedThatMatches(secondFrontfunctor, Position(6, 2), "#")
+      val secondFrontFunctor = firstFrontFunctor.replace(firstFront, "@")
+      val secondSeed = aSeedThatMatches(secondFrontFunctor, Position(6, 2), "#")
 
-      val secondFront: List[Position] = secondFrontfunctor.propagateFront(
+      val secondFront: List[Position] = secondFrontFunctor.propagateFront(
         seeds = List(secondSeed),
         searchedValue = "#",
         markWith = "&"
       )
-      secondFrontfunctor.replace(secondFront, "&") shouldBe anImageWrapperFrom(
+      secondFrontFunctor.replace(secondFront, "&") shouldBe anImageWrapperFrom(
         """
           |......@@@........
           |...@@@...@@......
@@ -196,7 +195,7 @@ pending
     }
 
     it("should detect unconnected elements in an image") {
-      val functor = anImageWrapperFrom(
+      val anImageFunctor = anImageWrapperFrom(
         """
           |.................
           |...##......##....
@@ -209,7 +208,7 @@ pending
           |.....######......
           |.................
         """.stripMargin)
-      functor.countConnectedElements(
+      anImageFunctor.countConnectedElements(
         contentValue = "#",
         emptyValue = "."
       ) shouldBe 3
@@ -223,8 +222,8 @@ pending
 
     it("should read and write a String image") {
       import java.nio.file.{Files, Paths}
-      val fileName: String = "output.png"
-      val functor = anImageWrapperFrom(
+      val aFileName: String = "output.png"
+      val anImageFunctor = anImageWrapperFrom(
         """
           |.................
           |...##......##....
@@ -238,27 +237,27 @@ pending
           |.................
         """.stripMargin)
 
-      val eventualUnit = ImageWriter.writeToImage(
-        fileName,
-        functor.rawImage,
+      val eventualResponse = ImageWriter.writeToImage(
+        aFileName,
+        anImageFunctor.rawImage,
         (pixel: String) => pixel == "#",
         GrayGradientOnHeight)
-      whenReady(eventualUnit, timeout) { response =>
-        Files.exists(Paths.get(fileName))
+      whenReady(eventualResponse, timeout) { response =>
+        Files.exists(Paths.get(aFileName))
       }
     }
 
     it("should read and write an Int image") {
       import java.nio.file.{Files, Paths}
-      val fileName: String = "outputColor.png"
-      val numberfunctor = ImageBuilder.IntImagefromFile("/input.txt").get
-      val eventualUnit = ImageWriter.writeToImage(
-        fileName,
-        numberfunctor.rawImage,
+      val aFileName = "outputColor.png"
+      val aNumericImageFunctor = ImageBuilder.IntImagefromFile("/input.txt").get
+      val eventualResponse = ImageWriter.writeToImage(
+        aFileName,
+        aNumericImageFunctor.rawImage,
         (pixel: Int) => pixel == 255,
         Rainbow)
-      whenReady(eventualUnit, timeout) { response =>
-        Files.exists(Paths.get(fileName))
+      whenReady(eventualResponse, timeout) { response =>
+        Files.exists(Paths.get(aFileName))
       }
     }
 
