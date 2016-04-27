@@ -1,4 +1,4 @@
-package fr.xebia.image
+package fr.xebia.image.core
 
 import scala.annotation.tailrec
 

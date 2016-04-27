@@ -1,5 +1,8 @@
 package fr.xebia.image
 
+import fr.xebia.image.core.{ImageProcessingMonad, Position, RawImage}
+import fr.xebia.image.export.ImageWriter
+
 object TestFactory {
 
   case class ImageBuilder() {

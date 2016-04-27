@@ -1,8 +1,10 @@
-package fr.xebia.image
+package fr.xebia.image.export
 
 import java.awt.image.{BufferedImage, WritableRaster}
 import java.io.File
 import javax.imageio.ImageIO
+
+import fr.xebia.image.core.RawImage
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -21,6 +23,7 @@ object ImageWriter {
 
   /**
     * Write a text image
+ *
     * @param fileName file path.
     * @param image image content
     * @tparam U type of pixel value
@@ -35,6 +38,7 @@ object ImageWriter {
 
   /**
     * Write a 24 bit RGB png image, given a filter and a color chooser.
+ *
     * @param fileName file path.
     * @param rawImage image content
     * @param keepValue filter function that must return <code>true</code> for pixel value to keep, <code>false</code> for pixel value to be erased (will be replaced by black (0,0,0))
@@ -64,43 +68,6 @@ object ImageWriter {
       image.setData(raster)
       ImageIO.write(image, "png", new File(fileName))
     }
-  }
-
-}
-
-/**
-  * Decide the RGB color that should be display at a specified position in image content.
-  * Used to convert a text-like image to a true image with 24 bits RGB pixels.
-  */
-sealed trait ColorStrategy {
-  /**
-    * Tell which RGB pixel should be at the specified position.
-    * @param row row of the pixel in image content
-    * @param col col of the pixel in image content
-    * @return a 24 bits RGB pixel (red, green, blue).
-    */
-  def decide(row: Int, col: Int): (Int, Int, Int)
-}
-
-/**
-  * Create a grey gradient (top - bottom, dark to light).
-  */
-case object GrayGradientOnHeight extends ColorStrategy {
-  override def decide(row: Int, col: Int): (Int, Int, Int) = {
-    val pixel = row * 10 + 50
-    (pixel, pixel, pixel)
-  }
-
-}
-
-/**
-  * Maps image positions to random colors.
-  */
-case object Rainbow extends ColorStrategy {
-
-  override def decide(row: Int, col: Int): (Int, Int, Int) = {
-    val r = scala.util.Random
-    (r.nextInt(255), r.nextInt(255), r.nextInt(255))
   }
 
 }

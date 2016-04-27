@@ -2,6 +2,8 @@ package fr.xebia.image
 
 import fr.xebia.image.TestFactory.ImagingTools._
 import fr.xebia.image.TestFactory._
+import fr.xebia.image.core.Position
+import fr.xebia.image.export.{GrayGradientOnHeight, ImageWriter, Rainbow}
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
