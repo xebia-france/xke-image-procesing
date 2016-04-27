@@ -1,7 +1,5 @@
 package fr.xebia.image.core
 
-import fr.xebia.image.Position
-
 import scala.annotation.tailrec
 
 /**
