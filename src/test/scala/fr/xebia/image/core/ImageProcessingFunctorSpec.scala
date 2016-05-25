@@ -3,7 +3,7 @@ package fr.xebia.image.core
 import fr.xebia.image.ImageBuilder
 import fr.xebia.image.TestFactory.ImagingTools._
 import fr.xebia.image.TestFactory._
-import fr.xebia.image.export.{GrayGradientOnHeight, ImageWriter, Rainbow}
+import fr.xebia.image.export.{CharValueGradientOnHeight, GrayGradientOnHeight, ImageWriter, Rainbow}
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
@@ -279,6 +279,33 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
         anImageFunctor.rawImage,
         (pixel: String) => pixel == "#",
         GrayGradientOnHeight)
+      whenReady(eventualResponse, timeout) { response =>
+        Files.exists(Paths.get(aFileName))
+      }
+    }
+
+    it("should read and write a String image using searched char as color value") {
+      import java.nio.file.{Files, Paths}
+      val aFileName: String = "outputValue.png"
+      val anImageFunctor = anImageFunctorFrom(
+        """
+          |.................
+          |...¨¨......¨¨....
+          |...¨¨......¨¨....
+          |...¨¨......¨¨....
+          |.................
+          |.................
+          |..÷÷........÷÷...
+          |...÷÷......÷÷....
+          |.....÷÷÷÷÷÷......
+          |.................
+        """.stripMargin)
+
+      val eventualResponse = ImageWriter.writeToImage(
+        aFileName,
+        anImageFunctor.rawImage,
+        (pixel: String) => pixel != ".",
+        CharValueGradientOnHeight)
       whenReady(eventualResponse, timeout) { response =>
         Files.exists(Paths.get(aFileName))
       }

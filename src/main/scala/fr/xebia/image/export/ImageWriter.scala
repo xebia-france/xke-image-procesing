@@ -47,14 +47,14 @@ object ImageWriter {
     * @tparam U type of pixel value
     * @return a Future to follow operation completion (Success or Failure) but no value is hold inside the returned Future.
     */
-  def writeToImage[U](fileName: String, rawImage: RawImage[U], keepValue: U => Boolean, colorDecider: ColorStrategy)(implicit ec: ExecutionContext): Future[Unit] = {
+  def writeToImage[U](fileName: String, rawImage: RawImage[U], keepValue: U => Boolean, colorDecider: ColorStrategy[U])(implicit ec: ExecutionContext): Future[Unit] = {
     Future {
       val image = new BufferedImage(rawImage.width, rawImage.height, BufferedImage.TYPE_INT_RGB)
       val raster = image.getData.asInstanceOf[WritableRaster]
       (0 until rawImage.height).zip(rawImage.content).toList
         .collect { case (rowIndex, rowData) =>
           (0 until rawImage.width).zip(rowData).collect { case (colIndex, pixel) =>
-            val (pixelR, pixelG, pixelB) = colorDecider.decide(rowIndex, colIndex)
+            val (pixelR, pixelG, pixelB) = colorDecider.decide(rowIndex, colIndex, pixel)
             val x = colIndex
             val y = rowIndex
             if (keepValue(pixel)) {
