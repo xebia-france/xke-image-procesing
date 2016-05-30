@@ -30,7 +30,11 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
     * @param emptyValue   the pixel value that will mark processed pixels
     * @return the number of components in this processed image (a component is a set of connected pixels).
     * Note:
-    *   - 
+    *   - Find the first position that matches the specified value
+    *   - Recursively 'go' through the image until no more position matches the specified value :
+    *     - Each time you find a position that matches the specified value, you must find all the neighbors withe the same value ( = the connected points)
+    *       by propagating a front from the first position
+    *     - One you found all connected points, replace them by the specified empty value, and restart withe the modified image.
     */
   def countConnectedElements(contentValue: U, emptyValue: U): Int = {
     @tailrec
