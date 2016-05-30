@@ -41,15 +41,11 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
     def go(copyImage: RawImage[U], maybePosition: Option[Position], connectedElements: Int): Int = {
       maybePosition match {
         case None =>
-          connectedElements
+          ???
 
         case Some(seed) =>
-          val connectedPoints = propagateFront(
-            copyImage.neighborsAndSelf(seed),
-            contentValue,
-            emptyValue
-          )
-          val newImage = copyImage.replace(connectedPoints, emptyValue)
+          val connectedPoints = ???
+          val newImage = ???
           go(newImage, getFirstThatMatchesOn(newImage, contentValue), connectedElements + 1)
       }
     }
