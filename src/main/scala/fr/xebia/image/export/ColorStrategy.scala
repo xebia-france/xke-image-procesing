@@ -28,6 +28,16 @@ case object GrayGradientOnHeight extends ColorStrategy {
 
 }
 
+case object AlwaysWhite extends ColorStrategy {
+
+  override def decide(row: Int, col: Int): (Int, Int, Int) = {
+    val pixel = 255
+    (pixel, pixel, pixel)
+  }
+
+}
+
+
 /**
   * Maps image positions to random colors.
   */

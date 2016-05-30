@@ -97,7 +97,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
           replaceBy = "-") shouldBe expectedContent
       }
 
-      it("should propagate a front from a simple image") {
+      it("TODO 05 - should propagate a front from a simple image") {
         val aContent =
           """
             |-#--#----
@@ -113,7 +113,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
 
     describe("reading files") {
 
-      it("should detect unconnected elements in an image from disk") {
+      it("TODO 05 - should detect unconnected elements in an image from disk") {
         val aFunctor = ImageBuilder.StringImageFromFile("/google.txt").get
         aFunctor.countConnectedElements(
           contentValue = "#",
@@ -121,7 +121,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
         ) shouldBe 6
       }
 
-      it("should detect the right amt of characters from a file containing 'xebia' ") {
+      it("TODO 05 - should detect the right amt of characters from a file containing 'xebia' ") {
         val aFunctor = ImageBuilder.StringImageFromFile("/xebia.txt").get
         aFunctor.countConnectedElements(
           contentValue = "#",
@@ -147,7 +147,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
           |.................
         """.stripMargin)
 
-      it("should propagate a front from a specified seed") {
+      it("TODO 04 - should propagate a front from a specified seed") {
         // given
         val specialChar = "@"
         val seed = Position(7, 0)
@@ -191,7 +191,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
         )
       }
 
-      it("should propagate a front from the first value that matches") {
+      it("TODO 04 - should propagate a front from the first value that matches") {
         // given
         val firstFrontFunctor = anImageFunctor
         val firstSeed = aSeedThatMatches(firstFrontFunctor, Position(6, 0), "#")
@@ -229,7 +229,7 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
         )
       }
 
-      it("should detect unconnected elements in an image") {
+      it("TODO 05 - should detect unconnected elements in an image") {
         val anImageFunctor = anImageFunctorFrom(
           """
             |.................
