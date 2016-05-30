@@ -37,16 +37,14 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
     *     - One you found all connected points, replace them by the specified empty value, and restart withe the modified image.
     */
   def countConnectedElements(contentValue: U, emptyValue: U): Int = {
-    @tailrec
+    //@tailrec uncomment this once implemented
     def go(copyImage: RawImage[U], maybePosition: Option[Position], connectedElements: Int): Int = {
       maybePosition match {
         case None =>
           ???
 
         case Some(seed) =>
-          val connectedPoints = ???
-          val newImage = ???
-          go(newImage, getFirstThatMatchesOn(newImage, contentValue), connectedElements + 1)
+          ???
       }
     }
     go(this.rawImage, firstThatMatches(contentValue), 0)
