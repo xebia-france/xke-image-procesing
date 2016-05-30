@@ -39,13 +39,7 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
   def countConnectedElements(contentValue: U, emptyValue: U): Int = {
     //@tailrec uncomment this once implemented
     def go(copyImage: RawImage[U], maybePosition: Option[Position], connectedElements: Int): Int = {
-      maybePosition match {
-        case None =>
-          ???
-
-        case Some(seed) =>
-          ???
-      }
+      ???
     }
     go(this.rawImage, firstThatMatches(contentValue), 0)
   }
