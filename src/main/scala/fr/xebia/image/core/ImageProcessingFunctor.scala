@@ -30,7 +30,7 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
     * @param emptyValue   the pixel value that will mark processed pixels
     * @return the number of components in this processed image (a component is a set of connected pixels).
     * Note:
-    *   - Find the first position that matches the specified value
+    *   - Find the first position (a.k.a the seed) that matches the specified value (see firstThatMatches)
     *   - Recursively 'go' through the image until no more position matches the specified value :
     *     - Each time you find a position that matches the specified value, you must find all the neighbors withe the same value ( = the connected points)
     *       by propagating a front from the first position
@@ -41,7 +41,7 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
     def go(copyImage: RawImage[U], maybePosition: Option[Position], connectedElements: Int): Int = {
       ???
     }
-    go(this.rawImage, firstThatMatches(contentValue), 0)
+    go(this.rawImage, ???, 0)
   }
 
   /*
