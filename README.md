@@ -30,4 +30,35 @@ Once in the _REPL_
 > ~testOnly fr.xebia.image.core.RawImageSpec
 ```
 
-You are good to go!!! 
+You are good to go!!!
+
+# Working with the code
+
+------
+## Related to image processing
+
+```
+> testOnly fr.xebia.image.core.RawImageSpec
+```
+
+### TODO `01`
+Get the first element that matches following a `left-right` / `up-down strategy`.
+
+### TODO `02`
+Replace the pixels at the specified position by the a pixel value.
+
+### TODO `03`
+Get the neighbors from a specified pixel.
+
+------
+## Code related to image propagation
+
+```
+> testOnly fr.xebia.image.core.ImageProcessingFunctorSpec
+```
+
+### TODO `04`
+Add the missing parts of the front propagation algorithm.
+
+### TODO `05`
+Count connected elements from several fronts.
