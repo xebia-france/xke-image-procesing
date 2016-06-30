@@ -32,9 +32,10 @@ Once in the _REPL_
 
 You are good to go!!!
 
+------
+
 # Working with the code
 
-------
 ## Related to image processing
 
 ```
@@ -50,7 +51,6 @@ Replace the pixels at the specified position by the a pixel value.
 ### TODO `03`
 Get the neighbors from a specified pixel.
 
-------
 ## Code related to image propagation
 
 ```
