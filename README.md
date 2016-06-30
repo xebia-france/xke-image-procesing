@@ -1,17 +1,33 @@
 Functional Image processing
 ======
 
-Static analysis with _Scala style_
-======
+## REPL
 
-To generate a configuration file
+### I don't know what the hell is SBT!! ¯¯\\_(ツ)_/¯¯ 
 
-    sbt scalastyleGenerateConfig
+Just type this
 
-To statically verify the code
+```
+> ./activator
+```
 
-    sbt scalastyle
+### C'mon! I already have everything installed
 
-To generate scaladoc
+```
+> sbt
+```
 
-    sbt compile:doc
+## Testing
+
+### How do I run the test?
+
+Once in the _REPL_
+
+```
+> test
+> testOnly fr.xebia.image.*
+> testOnly fr.xebia.image.core.RawImageSpec
+> ~testOnly fr.xebia.image.core.RawImageSpec
+```
+
+You are good to go!!! 
