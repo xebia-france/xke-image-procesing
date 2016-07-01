@@ -51,7 +51,7 @@ Replace the pixels at the specified position by the a pixel value.
 ### TODO `03`
 Get the neighbors from a specified pixel.
 
-## Code related to image propagation
+## Related to image propagation
 
 ```
 > testOnly fr.xebia.image.core.ImageProcessingFunctorSpec
