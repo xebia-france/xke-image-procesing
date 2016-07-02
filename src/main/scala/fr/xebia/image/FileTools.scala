@@ -1,5 +1,11 @@
 package fr.xebia.image
 
+import java.awt.image.BufferedImage
+import java.io.FileNotFoundException
+import javax.imageio.ImageIO
+
+import scala.util.Try
+
 object FileTools {
 
   /**
@@ -11,5 +17,15 @@ object FileTools {
     */
   def readImage(fileName: String): List[String] = scala.io.Source
     .fromInputStream(getClass.getResourceAsStream(fileName)).getLines().toList
+
+  def readPixelImage(fileName: String): Try[BufferedImage] = {
+    Try{
+      val resourceStream = getClass.getResourceAsStream(fileName)
+      if(resourceStream == null) throw new FileNotFoundException(s"$fileName (getClass.getResourceAsStream returned null)")
+      else ImageIO.read(resourceStream)
+    }
+  }
+
+
 
 }

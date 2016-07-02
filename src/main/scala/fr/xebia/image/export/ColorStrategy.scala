@@ -42,6 +42,17 @@ case object CharValueGradientOnHeight extends ColorStrategy[String] {
 
 }
 
+case object IdentityStrategy extends ColorStrategy[Int] {
+  /**
+    * Tell which RGB pixel should be at the specified position.
+    *
+    * @param row row of the pixel in image content
+    * @param col col of the pixel in image content
+    * @return a 24 bits RGB pixel (red, green, blue).
+    */
+  override def decide(row: Int, col: Int, value: Int): (Int, Int, Int) = (value, value, value)
+}
+
 /**
   * Maps image positions to random colors.
   */

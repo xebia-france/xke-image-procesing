@@ -1,5 +1,8 @@
 package fr.xebia.image
 
+import java.awt.color.ColorSpace
+import java.awt.image.{BufferedImage, ColorConvertOp, DataBufferByte}
+
 import fr.xebia.image.core.{ImageProcessingFunctor, RawImage}
 
 import scala.util.Try
@@ -30,6 +33,26 @@ object ImageBuilder {
     } yield {
       ImageProcessingFunctor[Int](RawImage[Int](contents))
     }
+
+  def IntImageFromBufferedImage(bufferedImage: BufferedImage): Try[ImageProcessingFunctor[Int]] = Try {
+    //1) Ensure image is black&white (for colored image, create a (Byte, Byte, Byte, Byte) image
+    val grayImg = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null)
+        .filter(bufferedImage, bufferedImage)
+    //After that, internal data buffer is still RGBA. Let's convert image to true gray scale
+    val width = grayImg.getWidth
+    val height = grayImg.getHeight
+    val grayScaleImg = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
+    val grayScaleImgG2d = grayScaleImg.createGraphics()
+    grayScaleImgG2d.drawImage(grayImg, 0, 0, null)
+    grayScaleImgG2d.dispose()
+
+    //2) get pixels as list of int. Sign extension is masked to get values from 0 to 255 instead of -128 to 127.
+    val data: List[Int] = grayScaleImg.getRaster.getDataBuffer.asInstanceOf[DataBufferByte].getData()
+        .map(_.toInt & 0xFF).toList
+    //4) make List[List[Int]]
+    val contents: List[List[Int]] = data.grouped(width).toList
+    ImageProcessingFunctor[Int](RawImage[Int](contents))
+  }
 
   private def fromFile[T](fileName: String, parseChar: Char => T): Try[ImageProcessingFunctor[T]] = {
     for {
