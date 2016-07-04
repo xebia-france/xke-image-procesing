@@ -1,4 +1,4 @@
-name := "scala-code-examples"
+name := "xke-image-processing"
 
 organization := "fr.xebia.scala"
 
