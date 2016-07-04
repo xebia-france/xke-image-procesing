@@ -14,6 +14,22 @@ class ImageProcessingFunctorSpec extends FunSpec with Matchers with ScalaFutures
 
     describe("handling hardcoded images") {
 
+      it("should display the right content") {
+        val image = anImageFunctorFrom(
+          """
+            |..##..
+            |##..##
+            |..##..
+          """.stripMargin)
+
+        val imageAsString = image.toString
+
+        imageAsString shouldBe
+          """..##..
+            |##..##
+            |..##..""".stripMargin
+      }
+
       it("should replace '#' by '@'") {
         // given an image
         val functor = anImageFunctorFrom(
