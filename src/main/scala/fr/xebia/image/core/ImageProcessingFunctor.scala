@@ -17,7 +17,6 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
   override def toString: String = rawImage.toString
 
   /**
-    * TODO 05
     * Count the number of components in this processed image and replaces all connected pixels in those components by an "empty pixel" marker.
     * Example: if <code>contentValue</code is '@', the following image has a connected elements count of 2. There is 2 distinguishable objects composed of connected '@'.
     * <pre>
@@ -39,15 +38,19 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
     *     - One you found all connected points, replace them by the specified empty value, and restart withe the modified image.
     */
   def countConnectedElements(contentValue: U, emptyValue: U): Int = {
-    //@tailrec uncomment this once implemented
+    @tailrec
     def go(copyImage: RawImage[U], maybePosition: Option[Position], connectedElements: Int): Int = {
-      ???
+      maybePosition match {
+        case None => connectedElements
+        case Some(position) =>
+          val newImage = copyImage.replace(propagateFront(List(position), contentValue, emptyValue), emptyValue)
+          go(newImage, newImage.firstThatMatches(contentValue), connectedElements + 1)
+      }
     }
-    go(this.rawImage, ???, 0)
+    go(rawImage, rawImage.firstThatMatches(contentValue), 0)
   }
 
   /*
-   * TODO 04
     * Helper function to find all connected pixels with the specified value.
     * @param seeds a list of position to start the lookup. Positions must be neighbors in order to find only connected pixels.
     * @param searchedValue the value that all connected pixels must match
@@ -59,9 +62,15 @@ case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
     *   - don't forget to concat the remaining seed with the neighborhood of the current position for the next iteration
     */
   private[image] def propagateFront(seeds: List[Position], searchedValue: U, markWith: U): List[Position] = {
-    //@tailrec uncomment this once implemented
+    @tailrec
     def go(imageCopy: RawImage[U], neighbors: List[Position], positions: List[Position]): List[Position] = {
-      ???
+      neighbors match {
+        case Nil => positions
+        case neighbor :: tail if imageCopy.at(neighbor) == searchedValue  =>
+          go(imageCopy.replace(List(neighbor), markWith), List.concat(imageCopy.neighborsOnly(neighbor), tail), neighbor :: positions)
+        case _ :: tail =>
+          go(imageCopy, tail, positions)
+      }
     }
     go(rawImage, seeds, List.empty[Position])
   }

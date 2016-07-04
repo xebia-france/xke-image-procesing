@@ -72,7 +72,7 @@ class RawImageSpec extends FunSpec with Matchers with ScalaFutures {
             |ce""".stripMargin
       }
 
-      it("TODO 03 - should filter the neighborhood of a pixel close to the border") {
+      it("should filter the neighborhood of a pixel close to the border") {
         val anImage = anImageFunctorFrom(aRealisticContent).rawImage
         anImage.neighborsOnly(Position(0, 0)).sorted shouldBe Seq(
           Position(1, 0),
@@ -120,7 +120,7 @@ class RawImageSpec extends FunSpec with Matchers with ScalaFutures {
         ).sorted
       }
 
-      it("TODO 01 - should get the first that matches ") {
+      it("should get the first that matches ") {
         val anImage = aStringImage.filledWith(aDummyContent)
         anImage firstThatMatches "a" shouldBe Some(Position(0, 0))
         anImage firstThatMatches "c" shouldBe Some(Position(0, 1))
@@ -137,7 +137,7 @@ class RawImageSpec extends FunSpec with Matchers with ScalaFutures {
 
     describe("processing data") {
 
-      it("TODO 02 - should replace the position specified") {
+      it("should replace the position specified") {
         val positionsToReplace = List(Position(0, 0), Position(1, 0))
         val expectedImage = RawImage[String](List(
           List("@", "@"),
