@@ -14,6 +14,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 case class ImageProcessingFunctor[U](rawImage: RawImage[U]) {
 
+  override def toString: String = rawImage.toString
+
   /**
     * TODO 05
     * Count the number of components in this processed image and replaces all connected pixels in those components by an "empty pixel" marker.

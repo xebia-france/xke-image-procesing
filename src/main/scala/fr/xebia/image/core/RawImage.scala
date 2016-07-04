@@ -23,6 +23,8 @@ case class RawImage[U](content: List[List[U]]) {
 
   val height = content.size
 
+  override def toString: String = content map (_ map (_.toString) mkString) mkString "\n"
+
   /**
     * TODO 01: Get the first element that matches following a left-right / up-down strategy
     * Note:

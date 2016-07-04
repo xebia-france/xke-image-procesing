@@ -61,6 +61,17 @@ class RawImageSpec extends FunSpec with Matchers with ScalaFutures {
         anImage at Position(1, 2) shouldBe "e"
       }
 
+      it("should display the right content") {
+        val image = aStringImage.filledWith(aDummyContent)
+
+        val imageAsString = image.toString
+
+        imageAsString shouldBe
+          """ab
+            |cd
+            |ce""".stripMargin
+      }
+
       it("TODO 03 - should filter the neighborhood of a pixel close to the border") {
         val anImage = anImageFunctorFrom(aRealisticContent).rawImage
         anImage.neighborsOnly(Position(0, 0)).sorted shouldBe Seq(
